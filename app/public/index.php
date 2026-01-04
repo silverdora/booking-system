@@ -16,8 +16,9 @@ use function FastRoute\simpleDispatcher;
  */
 $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute( 'GET', '/salons', ['App\Controllers\SalonController', 'index']);
-    $r->addRoute('GET', '/salons/{name}', ['App\Controllers\SalonController', 'showOneSalon']);
-    $r->addRoute('POST', '/salons', ['App\Controllers\SalonController', 'store']);
+    $r->addRoute('GET', '/salons/{id:\d+}', ['App\Controllers\SalonController', 'showOneSalon']);
+    $r->addRoute('GET',  '/salons/create', ['App\Controllers\SalonController', 'create']);
+    $r->addRoute('POST', '/salons/create', ['App\Controllers\SalonController', 'addNewSalon']);
 });
 
 /**
@@ -59,7 +60,7 @@ switch ($routeInfo[0]) {
         $method = $routeInfo[1][1];
         $controller = new $class();
         $vars = $routeInfo[2];
-        $controller->$method($vars);
+        $controller->$method(...array_values($vars));
         break;
 
 }

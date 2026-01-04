@@ -23,6 +23,11 @@
 <?php if (!empty($salon['email'])) : ?>
     <p><strong>Email:</strong> <?= htmlspecialchars($salon['email']) ?></p>
 <?php endif; ?>
+
+<?php if (!empty($salon['description'])) : ?>
+    <h2>Description</h2>
+    <p><?= nl2br(htmlspecialchars($salon['description'])) ?></p>
 <?php endif; ?>
 </body>
 </html>
+

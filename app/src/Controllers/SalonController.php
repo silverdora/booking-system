@@ -25,7 +25,7 @@ class SalonController
         $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
-    //archive list of all salons
+    //list of all salons
     public function index(): void
     {
         $stmt = $this->connection->query(
@@ -38,8 +38,14 @@ class SalonController
         require __DIR__ . '/../Views/salons/index.php';
     }
 
-    // create a new salon
-    public function store(): void
+    // create a new salon view
+    public function create(): void
+    {
+        require __DIR__ . '/../Views/salons/create.php';
+    }
+
+    // create a new salon POST form
+    public function addNewSalon(): void
     {
         // Basic server-side validation
         $name        = trim($_POST['name'] ?? '');
@@ -70,31 +76,21 @@ class SalonController
 
         // Redirect back to archive so the new salon shows up
         //add success page later
-        header('/../src/Views/salons');
+        header('Location: /salons');
         exit;
     }
 
     //show single salon
-    public function showOneSalon(string $name): void
+    public function showOneSalon(int $id): void
     {
-        if (!$name) {
-            // later: show proper 404
-            echo 'Salon not found';
-            return;
-        }
-
-        $stmt = $this->connection->prepare(
-            'SELECT * FROM salons WHERE name = :name'
-        );
-        $stmt->bindParam('name', $name, PDO::PARAM_STR);
+        $stmt = $this->connection->prepare('SELECT * FROM salons WHERE id = :id');
+        $stmt->bindValue('id', $id, PDO::PARAM_INT);
         $stmt->execute();
         $salon = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$salon) {
-            echo 'Salon not found';
-            return;
-        }
+        if (!$salon) { echo 'Salon not found'; return; }
 
         require __DIR__ . '/../Views/salons/salon.php';
     }
+
 }

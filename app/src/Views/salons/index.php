@@ -17,11 +17,12 @@
             <li>
                 <h2>
                     <!-- LINK TO DETAIL PAGE -->
-                    <a href="/salons/show?id=<?= htmlspecialchars($salon['id']) ?>">
+                    <a href="/salons/<?= htmlspecialchars($salon['id']) ?>">
                         <?= htmlspecialchars($salon['name']) ?>
                     </a>
                 </h2>
-                <p><?= htmlspecialchars($salon['type']) ?> in <?= htmlspecialchars($salon['city']) ?></p>
+                <p><?= htmlspecialchars($salon['type']) ?></p>
+                <p><?= htmlspecialchars($salon['city']) ?></p>
             </li>
         <?php endforeach; ?>
     </ul>

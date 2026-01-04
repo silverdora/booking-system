@@ -9,7 +9,7 @@
 <p><a href="/salons">&larr; Back to salons</a></p>
 <h1>Create a new salon</h1>
 
-<form action="/salons" method="post">
+<form action="/salons/create" method="post">
     <label for="name">Name*</label>
     <input id="name" name="name" required>
 
@@ -23,7 +23,7 @@
     <input id="city" name="city" required>
 
     <label for="phone">Phone</label>
-    <input id="phone" name="phone">
+    <input id="phone" name="phone" type="tel">
 
     <label for="email">Email</label>
     <input id="email" name="email" type="email">
