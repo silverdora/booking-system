@@ -1,10 +1,12 @@
 <?php
 
 namespace App\Controllers;
-
+use App\Models\SalonModel;
 use App\Services\ISalonService;
 use App\Services\SalonService;
 use App\ViewModels\SalonsViewModel;
+use App\ViewModels\SalonDetailViewModel;
+
 
 class SalonController
 {
@@ -32,32 +34,8 @@ class SalonController
     // create a new salon POST form
     public function addNewSalon(): void
     {
-        // Basic server-side validation
-        $name        = trim($_POST['name'] ?? '');
-        $type        = trim($_POST['type'] ?? '');
-        $address     = trim($_POST['address'] ?? '');
-        $city        = trim($_POST['city'] ?? '');
-        $phone       = trim($_POST['phone'] ?? '');
-        $email       = trim($_POST['email'] ?? '');
-
-        if ($name === '' || $address === '' || $city === '') {
-            echo 'Name, address and city are required.';
-            return;
-        }
-
-        $stmt = $this->connection->prepare(
-            'INSERT INTO salons (name, type, address, city, phone, email)
-             VALUES (:name, :type, :address, :city, :phone, :email)'
-        );
-
-        $stmt->bindParam('name', $name);
-        $stmt->bindParam('type', $type);
-        $stmt->bindParam('address', $address);
-        $stmt->bindParam('city', $city);
-        $stmt->bindParam('phone', $phone);
-        $stmt->bindParam('email', $email);
-
-        $stmt->execute();
+        $salon = new SalonModel($_POST);
+        $this->salonService->create($salon);
 
         // Redirect back to archive so the new salon shows up
         //add success page later
@@ -68,14 +46,45 @@ class SalonController
     //show single salon
     public function showOneSalon(int $id): void
     {
-        $stmt = $this->connection->prepare('SELECT * FROM salons WHERE id = :id');
-        $stmt->bindValue('id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-        $salon = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$salon) { echo 'Salon not found'; return; }
-
+        $salon = $this->salonService->getById($id);
+        if ($salon === null) {
+            // simple 404 for now
+            http_response_code(404);
+            echo "Salon not found";
+            return;
+        }
+        $vm = new SalonDetailViewModel($salon);
         require __DIR__ . '/../Views/salons/salon.php';
+
+    }
+    public function delete($id): void
+    {
+        $id = (int)$id;
+        $this->salonService->delete($id);
+        header('Location: /salons');
+        exit;
+    }
+
+    public function edit($id): void
+    {
+        $id = (int)$id;
+        $salon = $this->salonService->getById($id);
+        if (!$salon) {
+            echo 'Salon not found';
+            return;
+        }
+
+        require __DIR__ . '/../Views/salons/edit.php';
+    }
+
+    public function update($id): void
+    {
+        $id = (int)$id;
+        $salon = new SalonModel($_POST);
+        $this->salonService->update($id, $salon);
+
+        header('Location: /salons');
+        exit;
     }
 
 }

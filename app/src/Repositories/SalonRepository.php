@@ -19,21 +19,62 @@ class SalonRepository extends Repository implements ISalonRepository
 
     public function create(SalonModel $salon): void
     {
-        // TODO: Implement create() method.
+        $sql = 'INSERT INTO salons (name, type, address, city, phone, email) VALUES (:name, :type, :address, :city, :phone, :email)';
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->bindParam(':name', $salon->name, \PDO::PARAM_STR);
+        $stmt->bindParam(':type', $salon->type, \PDO::PARAM_STR);
+        $stmt->bindParam(':address', $salon->address, \PDO::PARAM_STR);
+        $stmt->bindParam(':city', $salon->city, \PDO::PARAM_STR);
+        $stmt->bindParam(':phone', $salon->phone, \PDO::PARAM_STR);
+        $stmt->bindParam(':email', $salon->email, \PDO::PARAM_STR);
+
+        $stmt->execute();
     }
 
-    public function get(int $id): ?ArticleModel
+    public function getById(int $id): ?SalonModel
     {
-        // TODO: Implement get() method.
+        $sql = 'SELECT id, name, type, phone, email, city, address FROM salons WHERE id = :id';
+
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->bindValue('id', $id, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        $stmt->setFetchMode(\PDO::FETCH_CLASS, '\App\Models\SalonModel');
+        $salon = $stmt->fetch();
+
+        return $salon ?: null;
     }
 
-    public function update(SalonModel $salon): void
+    public function update(int $id, SalonModel $salon): void
     {
-        // TODO: Implement update() method.
+        $sql = 'UPDATE salons
+            SET name = :name,
+                type = :type,
+                address = :address,
+                city = :city,
+                phone = :phone,
+                email = :email
+            WHERE id = :id';
+
+        $stmt = $this->getConnection()->prepare($sql);
+
+        $stmt->execute([
+            ':id' => $id,
+            ':name' => $salon->name,
+            ':type' => $salon->type,
+            ':address' => $salon->address,
+            ':city' => $salon->city,
+            ':phone' => $salon->phone,
+            ':email' => $salon->email,
+        ]);
     }
+
 
     public function delete(int $id): void
     {
-        // TODO: Implement delete() method.
+        $sql = 'DELETE FROM salons WHERE id = :id';
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->bindValue(':id', $id, \PDO::PARAM_INT);
+        $stmt->execute();
     }
 }

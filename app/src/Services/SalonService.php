@@ -22,14 +22,14 @@ class SalonService implements ISalonService
         $this->salonRepository->create($salon);
     }
 
-    public function get(int $id): ?SalonModel
+    public function getById(int $id): ?SalonModel
     {
-        return $this->salonRepository->get($id);
+        return $this->salonRepository->getById($id);
     }
 
-    public function update(SalonModel $salon): void
+    public function update(int $id, SalonModel $salon): void
     {
-        $this->salonRepository->update($salon);
+        $this->salonRepository->update($id, $salon);
     }
 
     public function delete(int $id): void

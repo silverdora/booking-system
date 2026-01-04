@@ -25,6 +25,12 @@
                 <p><?= htmlspecialchars($salon->type) ?></p>
                 <p><?= htmlspecialchars($salon->city) ?></p>
             </li>
+            <form action="/salons/<?= htmlspecialchars((string)$salon->id) ?>/delete" method="post"
+                  onsubmit="return confirm('Delete this salon?');"
+                  style="display:inline">
+                <button type="submit">Delete</button>
+            </form>
+            <a href="/salons/<?= htmlspecialchars((string)$salon->id) ?>/edit">Edit</a>
         <?php endforeach; ?>
     </ul>
 <?php else : ?>

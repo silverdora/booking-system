@@ -9,9 +9,9 @@ interface ISalonService
 
     public function create(SalonModel $salon): void;
 
-    public function get(int $id): ?SalonModel;
+    public function getById(int $id): ?SalonModel;
 
-    public function update(SalonModel $Salon): void;
+    public function update(int $id, SalonModel $Salon): void;
 
     public function delete(int $id): void;
 }
