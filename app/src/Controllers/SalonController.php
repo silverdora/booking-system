@@ -2,39 +2,24 @@
 
 namespace App\Controllers;
 
-use App\Config;
-use PDO;
+use App\Services\ISalonService;
+use App\Services\SalonService;
+use App\ViewModels\SalonsViewModel;
 
 class SalonController
 {
-    private PDO $connection;
+    private ISalonService $salonService;
 
     public function __construct()
     {
-        // build PDO connection
-        $dsn = 'mysql:host=' . Config::DB_SERVER_NAME .
-            ';dbname=' . Config::DB_NAME .
-            ';charset=utf8mb4';
-
-        $this->connection = new PDO(
-            $dsn,
-            Config::DB_USERNAME,
-            Config::DB_PASSWORD
-        );
-
-        $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->salonService = new SalonService();
     }
 
     //list of all salons
     public function index(): void
     {
-        $stmt = $this->connection->query(
-            'SELECT id, name, type, city 
-             FROM salons 
-             ORDER BY name'
-        );
-        $salons = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+        $salons = $this->salonService->getAll();
+        $vm = new SalonsViewModel($salons);
         require __DIR__ . '/../Views/salons/index.php';
     }
 

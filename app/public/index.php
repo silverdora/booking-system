@@ -19,6 +19,9 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET', '/salons/{id:\d+}', ['App\Controllers\SalonController', 'showOneSalon']);
     $r->addRoute('GET',  '/salons/create', ['App\Controllers\SalonController', 'create']);
     $r->addRoute('POST', '/salons/create', ['App\Controllers\SalonController', 'addNewSalon']);
+    $r->addRoute('GET',  '/salons/{id:\d+}/edit', ['App\Controllers\SalonController', 'edit']);
+    $r->addRoute('POST', '/salons/{id:\d+}/edit', ['App\Controllers\SalonController', 'update']);
+    $r->addRoute('POST', '/salons/{id:\d+}/delete',['App\Controllers\SalonController', 'delete']);
 });
 
 /**

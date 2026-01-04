@@ -36,7 +36,7 @@ class Repository
             
         } catch (\PDOException $e){
             //tell PDO to throw exception or error
-            self::$connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ATTR_ERRMODE_EXCEPTION);
+            self::$connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             error_log($e->getMessage()); //log the real error
             die("DB connection failed"); //display message
         }

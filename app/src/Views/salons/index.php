@@ -1,3 +1,6 @@
+<?php
+/** @var \App\ViewModels\SalonsViewModel $vm */
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,21 +11,19 @@
 <body>
 <h1>Salons</h1>
 
-
 <p><a href="/salons/create">Add a salon</a></p>
 
-<?php if (!empty($salons)) : ?>
+<?php if (!empty($vm->salons)) : ?>
     <ul>
-        <?php foreach ($salons as $salon) : ?>
+        <?php foreach ($vm->salons as $salon) : ?>
             <li>
                 <h2>
-                    <!-- LINK TO DETAIL PAGE -->
-                    <a href="/salons/<?= htmlspecialchars($salon['id']) ?>">
-                        <?= htmlspecialchars($salon['name']) ?>
+                    <a href="/salons/<?= htmlspecialchars((string)$salon->id) ?>">
+                        <?= htmlspecialchars($salon->name) ?>
                     </a>
                 </h2>
-                <p><?= htmlspecialchars($salon['type']) ?></p>
-                <p><?= htmlspecialchars($salon['city']) ?></p>
+                <p><?= htmlspecialchars($salon->type) ?></p>
+                <p><?= htmlspecialchars($salon->city) ?></p>
             </li>
         <?php endforeach; ?>
     </ul>
@@ -31,4 +32,5 @@
 <?php endif; ?>
 </body>
 </html>
+
 

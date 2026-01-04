@@ -4,7 +4,7 @@ namespace App\Models;
 
 class SalonModel
 {
-    public int $id;
+    public ?int $id = null;
     public string $name;
     public string $type;
     public string $description;
@@ -13,26 +13,19 @@ class SalonModel
     public string $city;
     public string $address;
 
-    /**
-     * @param int $id
-     * @param string $name
-     * @param string $type
-     * @param string $description
-     * @param string $phone
-     * @param string $email
-     * @param string $city
-     * @param string $address
-     */
-    public function __construct(int $id, string $name, string $type, string $description, string $phone, string $email, string $city, string $address)
+    public function __construct(array $data = [])
     {
-        $this->id = $id;
-        $this->name = $name;
-        $this->type = $type;
-        $this->description = $description;
-        $this->phone = $phone;
-        $this->email = $email;
-        $this->city = $city;
-        $this->address = $address;
+        if (empty($data)){
+            return;
+        }
+        $this->id = isset($data['id']) && $data['id'] !== '' ? (int)$data['id'] : null;
+        $this->name = $data['name'] ?? '';
+        $this->type = $data['type'] ?? '';
+        $this->description = $data['description'] ?? '';
+        $this->phone = $data['phone'] ?? '';
+        $this->email = $data['email'] ?? '';
+        $this->city = $data['city'] ?? '';
+        $this->address = $data['address'] ?? '';
     }
 
 }
