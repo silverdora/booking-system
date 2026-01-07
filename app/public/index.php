@@ -15,13 +15,41 @@ use function FastRoute\simpleDispatcher;
  * Define the routes for the application.
  */
 $dispatcher = simpleDispatcher(function (RouteCollector $r) {
+    //Salons
+    // Archive
     $r->addRoute( 'GET', '/salons', ['App\Controllers\SalonController', 'index']);
+
+    // Detail
     $r->addRoute('GET', '/salons/{id:\d+}', ['App\Controllers\SalonController', 'showOneSalon']);
+
+    // Create form + store
     $r->addRoute('GET',  '/salons/create', ['App\Controllers\SalonController', 'create']);
     $r->addRoute('POST', '/salons/create', ['App\Controllers\SalonController', 'addNewSalon']);
+
+    // Delete
     $r->addRoute('POST', '/salons/{id:\d+}/delete', ['App\Controllers\SalonController', 'delete']);
+
+    // Edit form + update
     $r->addRoute('GET',  '/salons/{id:\d+}/edit', ['App\Controllers\SalonController', 'edit']);
     $r->addRoute('POST', '/salons/{id:\d+}/edit', ['App\Controllers\SalonController', 'update']);
+
+    //Users
+    // Archive per role
+    $r->addRoute('GET',  '/users/{role}',                 ['App\Controllers\UserController', 'index']);
+
+    // Create form + store
+    $r->addRoute('GET',  '/users/{role}/create',          ['App\Controllers\UserController', 'create']);
+    $r->addRoute('POST', '/users/{role}/create',          ['App\Controllers\UserController', 'store']);
+
+    // Detail
+    $r->addRoute('GET',  '/users/{role}/{id:\d+}',        ['App\Controllers\UserController', 'show']);
+
+    // Edit form + update
+    $r->addRoute('GET',  '/users/{role}/{id:\d+}/edit',   ['App\Controllers\UserController', 'edit']);
+    $r->addRoute('POST', '/users/{role}/{id:\d+}/edit',   ['App\Controllers\UserController', 'update']);
+
+    // Delete
+    $r->addRoute('POST', '/users/{role}/{id:\d+}/delete', ['App\Controllers\UserController', 'delete']);
 
 });
 
