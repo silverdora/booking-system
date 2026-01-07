@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\UserRole;
 use App\Models\UserModel;
+use \App\Services\IUsersService;
 use App\Repositories\IUsersRepository;
 use App\Repositories\UsersRepository;
 
@@ -59,6 +60,9 @@ class UsersService implements IUsersService
         if (trim($user->firstName) === '' || trim($user->lastName) === '' || trim($user->email) === '') {
             throw new \InvalidArgumentException('Missing required fields');
         }
+        if ($user->role === 'customer') {
+            $user->salonId = null;
+        }
 
         $this->usersRepository->create($user);
     }
@@ -71,6 +75,9 @@ class UsersService implements IUsersService
 
         if (trim($user->firstName) === '' || trim($user->lastName) === '' || trim($user->email) === '') {
             throw new \InvalidArgumentException('Missing required fields');
+        }
+        if ($user->role === 'customer') {
+            $user->salonId = null;
         }
 
         $this->usersRepository->update($id, $user);

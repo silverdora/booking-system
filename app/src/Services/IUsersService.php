@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\UserModel;
 
-interface IUserService
+interface IUsersService
 {
     public function normalizeRole(string $roleFromUrl): string;
 

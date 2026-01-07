@@ -3,10 +3,11 @@
 namespace App\Controllers;
 
 use App\Models\UserModel;
-use App\Services\IUserService;
-use App\Services\UserService;
+use App\Services\IUsersService;
+use App\Services\UsersService;
 use App\ViewModels\UsersViewModel;
 use App\ViewModels\UserDetailViewModel;
+use App\ViewModels\UserFormViewModel;
 
 class UsersController
 {
@@ -39,7 +40,7 @@ class UsersController
 
             $user = new UserModel(['role' => $role]);
             $isEdit = false;
-
+            $vm = new UserFormViewModel($user, $role, $isEdit);
             require __DIR__ . '/../Views/users/create.php';
         } catch (\InvalidArgumentException $e) {
             http_response_code(404);
@@ -55,7 +56,7 @@ class UsersController
             $user = new UserModel($_POST);
             $user->role = $role;
 
-            $this->userService->create($user);
+            $this->usersService->create($user);
 
             header('Location: /users/' . $this->pluralRole($role));
             exit;
@@ -76,7 +77,7 @@ class UsersController
             // Business check: user must exist and match URL role
             if (!$user || $user->role !== $role) {
                 http_response_code(404);
-                echo 'Not found';
+                echo 'Not found: user must exist and match URL role';
                 return;
             }
 
@@ -84,7 +85,7 @@ class UsersController
             require __DIR__ . '/../Views/users/show.php';
         } catch (\InvalidArgumentException $e) {
             http_response_code(404);
-            echo 'Not found';
+            echo 'Not found: InvalidArgumentException';
         }
     }
 
@@ -101,8 +102,9 @@ class UsersController
                 return;
             }
 
-            $isEdit = true;
-            require __DIR__ . '/../Views/users/form.php';
+            $vm = new UserFormViewModel($user, $role, true);
+
+            require __DIR__ . '/../Views/users/edit.php';
         } catch (\InvalidArgumentException $e) {
             http_response_code(404);
             echo 'Not found';

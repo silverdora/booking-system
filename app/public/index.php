@@ -35,21 +35,21 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
 
     //Users
     // Archive per role
-    $r->addRoute('GET',  '/users/{role}',                 ['App\Controllers\UserController', 'index']);
+    $r->addRoute('GET',  '/users/{role}',                 ['App\Controllers\UsersController', 'index']);
 
     // Create form + store
-    $r->addRoute('GET',  '/users/{role}/create',          ['App\Controllers\UserController', 'create']);
-    $r->addRoute('POST', '/users/{role}/create',          ['App\Controllers\UserController', 'store']);
+    $r->addRoute('GET',  '/users/{role}/create',          ['App\Controllers\UsersController', 'create']);
+    $r->addRoute('POST', '/users/{role}/create',          ['App\Controllers\UsersController', 'store']);
 
     // Detail
-    $r->addRoute('GET',  '/users/{role}/{id:\d+}',        ['App\Controllers\UserController', 'show']);
+    $r->addRoute('GET',  '/users/{role}/{id:\d+}',        ['App\Controllers\UsersController', 'show']);
 
     // Edit form + update
-    $r->addRoute('GET',  '/users/{role}/{id:\d+}/edit',   ['App\Controllers\UserController', 'edit']);
-    $r->addRoute('POST', '/users/{role}/{id:\d+}/edit',   ['App\Controllers\UserController', 'update']);
+    $r->addRoute('GET',  '/users/{role}/{id:\d+}/edit',   ['App\Controllers\UsersController', 'edit']);
+    $r->addRoute('POST', '/users/{role}/{id:\d+}/edit',   ['App\Controllers\UsersController', 'update']);
 
     // Delete
-    $r->addRoute('POST', '/users/{role}/{id:\d+}/delete', ['App\Controllers\UserController', 'delete']);
+    $r->addRoute('POST', '/users/{role}/{id:\d+}/delete', ['App\Controllers\UsersController', 'delete']);
 
 });
 

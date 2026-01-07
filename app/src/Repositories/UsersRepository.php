@@ -40,7 +40,7 @@ class UsersRepository extends Repository implements IUsersRepository
 
     public function create(UserModel $user): void
     {
-        $sql = 'INSERT INTO users (id, role, firstName, lastName, email, phone, salonId, password)
+        $sql = 'INSERT INTO users (role, firstName, lastName, email, phone, salonId, password)
                 VALUES (:role, :firstName, :lastName, :email, :phone, :salonId, :password)';
 
         $stmt = $this->getConnection()->prepare($sql);
@@ -48,8 +48,8 @@ class UsersRepository extends Repository implements IUsersRepository
         // execute array to avoid bind mistakes + handles null nicely
         $stmt->execute([
             ':role' => $user->role,
-            ':first_name' => $user->firstName,
-            ':last_name' => $user->lastName,
+            ':firstName' => $user->firstName,
+            ':lastName' => $user->lastName,
             ':email' => $user->email,
             ':phone' => $user->phone,
             ':salonId' => $user->salonId,          // can be null
