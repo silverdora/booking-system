@@ -33,6 +33,19 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET',  '/salons/{id:\d+}/edit', ['App\Controllers\SalonController', 'edit']);
     $r->addRoute('POST', '/salons/{id:\d+}/edit', ['App\Controllers\SalonController', 'update']);
 
+    //SalonServices
+    $r->addRoute('GET',  '/salons/{salonId:\d+}/services',                   ['App\Controllers\SalonServicesController', 'index']);
+    $r->addRoute('GET',  '/salons/{salonId:\d+}/services/create',            ['App\Controllers\SalonServicesController', 'create']);
+    $r->addRoute('POST', '/salons/{salonId:\d+}/services/create',            ['App\Controllers\SalonServicesController', 'store']);
+
+    $r->addRoute('GET',  '/salons/{salonId:\d+}/services/{id:\d+}',          ['App\Controllers\SalonServicesController', 'show']);
+
+    $r->addRoute('GET',  '/salons/{salonId:\d+}/services/{id:\d+}/edit',     ['App\Controllers\SalonServicesController', 'edit']);
+    $r->addRoute('POST', '/salons/{salonId:\d+}/services/{id:\d+}/edit',     ['App\Controllers\SalonServicesController', 'update']);
+
+    $r->addRoute('POST', '/salons/{salonId:\d+}/services/{id:\d+}/delete',   ['App\Controllers\SalonServicesController', 'delete']);
+
+
     //Users
     // Archive per role
     $r->addRoute('GET',  '/users/{role}',                 ['App\Controllers\UsersController', 'index']);
