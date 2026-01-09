@@ -67,7 +67,7 @@ class SalonServicesRepository extends Repository implements ISalonServicesReposi
 
         $stmt = $this->getConnection()->prepare($sql);
         $stmt->execute([
-            ':salon_id' => $salonId,
+            ':salonId' => $salonId,
             ':specialistId' => $service->specialistId,
             ':id' => $id,
             ':name' => $service->name,
@@ -81,7 +81,7 @@ class SalonServicesRepository extends Repository implements ISalonServicesReposi
         $sql = 'DELETE FROM salonServices WHERE salonId = :salonId AND id = :id';
         $stmt = $this->getConnection()->prepare($sql);
         $stmt->execute([
-            ':$salonId' => $salonId,
+            ':salonId' => $salonId,
             ':id' => $id,
         ]);
     }
