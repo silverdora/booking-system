@@ -42,7 +42,7 @@ class SalonServicesRepository extends Repository implements ISalonServicesReposi
     public function create(SalonServiceModel $service): void
     {
         $sql = 'INSERT INTO salonServices (salonId, specialistId, name, price, durationMinutes)
-                VALUES (:salonId, specialistId, :name, :price, :durationMinutes)';
+                VALUES (:salonId, :specialistId, :name, :price, :durationMinutes)';
 
         $stmt = $this->getConnection()->prepare($sql);
         $stmt->execute([

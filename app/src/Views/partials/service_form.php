@@ -1,5 +1,5 @@
 <?php
-use App\ViewModels\SalonServices\SalonServiceFormViewModel;
+use App\ViewModels\SalonServiceFormViewModel;
 /** @var SalonServiceFormViewModel $vm */
 $service = $vm->service;
 ?>
@@ -24,8 +24,8 @@ $service = $vm->service;
     <input id="price" name="price" type="number" step="0.01" min="0"
            value="<?= htmlspecialchars($service->price !== null ? (string)$service->price : '') ?>">
 
-    <label for="duration_minutes">Duration (minutes)</label>
-    <input id="duration_minutes" name="duration_minutes" type="number" min="0"
+    <label for="durationMinutes">Duration (minutes)</label>
+    <input id="durationMinutes" name="durationMinutes" type="number" min="0"
            value="<?= htmlspecialchars($service->durationMinutes !== null ? (string)$service->durationMinutes : '') ?>">
 
     <button type="submit"><?= $vm->isEdit ? 'Save changes' : 'Create service' ?></button>

@@ -34,7 +34,7 @@ use App\ViewModels\SalonServices\SalonServicesViewModel;
                 <?php endif; ?>
 
                 <?php if ($service->durationMinutes !== null) : ?>
-                    <p><strong>Duration:</strong> <?= htmlspecialchars((string)$service->duration_minutes) ?> min</p>
+                    <p><strong>Duration:</strong> <?= htmlspecialchars((string)$service->durationMinutes) ?> min</p>
                 <?php endif; ?>
 
                 <p>
