@@ -85,5 +85,26 @@ class SalonServicesRepository extends Repository implements ISalonServicesReposi
             ':id' => $id,
         ]);
     }
+
+    public function getOptionsBySalonId(int $salonId): array
+    {
+        $sql = 'SELECT id, name
+            FROM salonServices
+            WHERE salonId = :salonId
+            ORDER BY name';
+
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([':salonId' => $salonId]);
+
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(function ($row) {
+            return [
+                'id' => (int)$row['id'],
+                'name' => (string)$row['name'],
+            ];
+        }, $rows);
+    }
+
 }
 

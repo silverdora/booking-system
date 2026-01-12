@@ -74,23 +74,23 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     // Delete
     $r->addRoute('POST', '/users/{role}/{id:\d+}/delete', ['App\Controllers\UsersController', 'delete']);
 
-//    // Appointments
-//    // Archive
-//    $r->addRoute('GET',  '/appointments',                 ['App\Controllers\AppointmentsController', 'index']);
-//
-//    // Create form + store
-//    $r->addRoute('GET',  '/appointments/create',          ['App\Controllers\AppointmentsController', 'create']);
-//    $r->addRoute('POST', '/appointments/create',          ['App\Controllers\AppointmentsController', 'store']);
-//
-//    // Detail
-//    $r->addRoute('GET',  '/appointments/{id:\d+}',        ['App\Controllers\AppointmentsController', 'show']);
-//
-//    // Edit form + update
-//    $r->addRoute('GET',  '/appointments/{id:\d+}/edit',   ['App\Controllers\AppointmentsController', 'edit']);
-//    $r->addRoute('POST', '/appointments/{id:\d+}/edit',   ['App\Controllers\AppointmentsController', 'update']);
-//
-//    // Delete
-//    $r->addRoute('POST', '/appointments/{id:\d+}/delete', ['App\Controllers\AppointmentsController', 'delete']);
+    // Appointments
+    // Archive
+    $r->addRoute('GET',  '/appointments',                 ['App\Controllers\AppointmentsController', 'index']);
+
+    // Create form + store
+    $r->addRoute('GET',  '/appointments/create',          ['App\Controllers\AppointmentsController', 'create']);
+    $r->addRoute('POST', '/appointments/create',          ['App\Controllers\AppointmentsController', 'store']);
+
+    // Detail
+    $r->addRoute('GET',  '/appointments/{id:\d+}',        ['App\Controllers\AppointmentsController', 'show']);
+
+    // Edit form + update
+    $r->addRoute('GET',  '/appointments/{id:\d+}/edit',   ['App\Controllers\AppointmentsController', 'edit']);
+    $r->addRoute('POST', '/appointments/{id:\d+}/edit',   ['App\Controllers\AppointmentsController', 'update']);
+
+    // Delete
+    $r->addRoute('POST', '/appointments/{id:\d+}/delete', ['App\Controllers\AppointmentsController', 'delete']);
 
 
 });

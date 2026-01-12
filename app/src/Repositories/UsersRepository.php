@@ -126,5 +126,48 @@ class UsersRepository extends Repository implements IUsersRepository
 
         return (int)$this->getConnection()->lastInsertId();
     }
+
+    public function getSpecialistOptions(int $salonId): array
+    {
+        $sql = 'SELECT id, firstName, lastName
+            FROM users
+            WHERE role = "specialist" AND salonId = :salonId
+            ORDER BY lastName, firstName';
+
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([':salonId' => $salonId]);
+
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(function ($row) {
+            $fullName = trim(($row['firstName'] ?? '') . ' ' . ($row['lastName'] ?? ''));
+            return [
+                'id' => (int)$row['id'],
+                'name' => $fullName !== '' ? $fullName : ('Specialist #' . (int)$row['id']),
+            ];
+        }, $rows);
+    }
+
+    public function getCustomerOptions(): array
+    {
+        $sql = 'SELECT id, firstName, lastName
+            FROM users
+            WHERE role = "customer"
+            ORDER BY lastName, firstName';
+
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute();
+
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(function ($row) {
+            $fullName = trim(($row['firstName'] ?? '') . ' ' . ($row['lastName'] ?? ''));
+            return [
+                'id' => (int)$row['id'],
+                'name' => $fullName !== '' ? $fullName : ('Customer #' . (int)$row['id']),
+            ];
+        }, $rows);
+    }
+
 }
 

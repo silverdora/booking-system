@@ -14,4 +14,6 @@ interface IUsersRepository
     public function delete(int $id): void;
     public function getByEmail(string $email): ?array;
     public function createUser(array $data): int;
+    public function getSpecialistOptions(int $salonId): array;
+    public function getCustomerOptions(): array;
 }
