@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/assets/css/main.css">
 </head>
 <body>
+<?php require __DIR__ . '/../partials/header.php'; ?>
 <h1>Salons</h1>
 
 <p><a href="/salons/create">Add a salon</a></p>

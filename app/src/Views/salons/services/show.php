@@ -11,7 +11,7 @@ $service = $vm->service;
     <link rel="stylesheet" href="/assets/css/main.css">
 </head>
 <body>
-
+<?php require __DIR__ . '/../partials/header.php'; ?>
 <p><a href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>/services">&larr; Back to services</a></p>
 
 <h1><?= htmlspecialchars($service->name) ?></h1>

@@ -1,4 +1,5 @@
 <?php
+session_start();
 /**
  * This is the central route handler of the application.
  * It uses FastRoute to map URLs to controller methods.
@@ -15,6 +16,15 @@ use function FastRoute\simpleDispatcher;
  * Define the routes for the application.
  */
 $dispatcher = simpleDispatcher(function (RouteCollector $r) {
+    // Authentication
+    $r->addRoute('GET',  '/login',    ['App\Controllers\AuthenticationController', 'showLogin']);
+    $r->addRoute('POST', '/login',    ['App\Controllers\AuthenticationController', 'login']);
+    $r->addRoute('POST', '/logout',   ['App\Controllers\AuthenticationController', 'logout']);
+
+    // Registration
+    $r->addRoute('GET',  '/register', ['App\Controllers\AuthenticationController', 'showRegister']);
+    $r->addRoute('POST', '/register', ['App\Controllers\AuthenticationController', 'register']);
+
     //Salons
     // Archive
     $r->addRoute( 'GET', '/salons', ['App\Controllers\SalonController', 'index']);
@@ -63,6 +73,25 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
 
     // Delete
     $r->addRoute('POST', '/users/{role}/{id:\d+}/delete', ['App\Controllers\UsersController', 'delete']);
+
+//    // Appointments
+//    // Archive
+//    $r->addRoute('GET',  '/appointments',                 ['App\Controllers\AppointmentsController', 'index']);
+//
+//    // Create form + store
+//    $r->addRoute('GET',  '/appointments/create',          ['App\Controllers\AppointmentsController', 'create']);
+//    $r->addRoute('POST', '/appointments/create',          ['App\Controllers\AppointmentsController', 'store']);
+//
+//    // Detail
+//    $r->addRoute('GET',  '/appointments/{id:\d+}',        ['App\Controllers\AppointmentsController', 'show']);
+//
+//    // Edit form + update
+//    $r->addRoute('GET',  '/appointments/{id:\d+}/edit',   ['App\Controllers\AppointmentsController', 'edit']);
+//    $r->addRoute('POST', '/appointments/{id:\d+}/edit',   ['App\Controllers\AppointmentsController', 'update']);
+//
+//    // Delete
+//    $r->addRoute('POST', '/appointments/{id:\d+}/delete', ['App\Controllers\AppointmentsController', 'delete']);
+
 
 });
 

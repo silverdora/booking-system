@@ -11,6 +11,7 @@ $salon = $vm->salon;
     <link rel="stylesheet" href="/assets/css/main.css">
 </head>
 <body>
+<?php require __DIR__ . '/../partials/header.php'; ?>
 <p><a href="/salons">&larr; Back to all salons</a></p>
 <a href="/salons/<?= htmlspecialchars((string)$salon->id) ?>/edit">Edit</a>
 <h1><?= htmlspecialchars($salon->name) ?></h1>

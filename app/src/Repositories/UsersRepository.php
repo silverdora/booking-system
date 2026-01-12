@@ -93,5 +93,38 @@ class UsersRepository extends Repository implements IUsersRepository
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
     }
+
+    public function getByEmail(string $email): ?array
+    {
+        $sql = 'SELECT id, role, firstName, lastName, email, phone, salonId, password
+                FROM users
+                WHERE email = :email
+                LIMIT 1';
+
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([':email' => $email]);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
+    public function createUser(array $data): int
+    {
+        $sql = 'INSERT INTO users (role, firstName, lastName, email, phone, salonId, password)
+                VALUES (:role, :firstName, :lastName, :email, :phone, :salonId, :password)';
+
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([
+            ':role' => $data['role'],
+            ':firstName' => $data['firstName'],
+            ':lastName' => $data['lastName'],
+            ':email' => $data['email'],
+            ':phone' => $data['phone'],
+            ':salonId' => $data['salonId'],
+            ':password' => $data['password'],
+        ]);
+
+        return (int)$this->getConnection()->lastInsertId();
+    }
 }
 
