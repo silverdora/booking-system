@@ -16,8 +16,13 @@ interface IAppointmentsRepository
         int $salonId,
         int $specialistId,
         string $startsAt,
+        string $endsAt,
         ?int $ignoreAppointmentId = null
     ): bool;
+    /** @return AppointmentModel[] */
+    public function getAppointmentsBySpecialistAndDate(int $salonId, int $specialistId, string $date): array;
+
+
 }
 
 

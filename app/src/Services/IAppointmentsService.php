@@ -15,6 +15,16 @@ interface IAppointmentsService
     public function getServiceOptions(int $salonId): array;
     public function getSpecialistOptions(int $salonId): array;
     public function getCustomerOptions(): array;
+    /**
+     * @return array<int, array{startsAt:string, endsAt:string}>
+     */
+    public function getAvailableSlotsBySpecialist(
+        int $salonId,
+        int $specialistId,
+        string $date,
+        int $durationMinutes
+    ): array;
+
 
 }
 

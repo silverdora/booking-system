@@ -10,6 +10,7 @@ class AppointmentModel
     public int $specialistId;
     public int $customerId;
     public string $startsAt;   // YYYY-MM-DD HH:MM:SS
+    public string $endsAt;   // YYYY-MM-DD HH:MM:SS
 
     public function __construct(array $data = [])
     {
@@ -23,6 +24,7 @@ class AppointmentModel
         $this->specialistId = (int)($data['specialistId'] ?? $data['specialistId'] ?? 0);
         $this->customerId = (int)($data['customerId'] ?? $data['customerId'] ?? 0);
         $this->startsAt = $data['startsAt'] ?? $data['startsAt'] ?? '';
+        $this->endsAt = $data['endsAt'] ?? $data['endsAt'] ?? '';
     }
 }
 

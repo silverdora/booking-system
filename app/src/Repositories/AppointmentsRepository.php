@@ -16,7 +16,8 @@ class AppointmentsRepository extends Repository implements IAppointmentsReposito
                     serviceId AS serviceId,
                     specialistId AS specialistId,
                     customerId AS customerId,
-                    startsAt AS startsAt
+                    startsAt AS startsAt,
+                    endsAt AS endsAt
                 FROM appointments
                 WHERE salonId = :salonId
                 ORDER BY startsAt';
@@ -35,7 +36,8 @@ class AppointmentsRepository extends Repository implements IAppointmentsReposito
                     serviceId AS serviceId,
                     specialistId AS specialistId,
                     customerId AS customerId,
-                    startsAt AS startsAt
+                    startsAt AS startsAt,
+                    endsAt AS endsAt
                 FROM appointments
                 WHERE salonId = :salonId AND id = :id';
 
@@ -54,9 +56,9 @@ class AppointmentsRepository extends Repository implements IAppointmentsReposito
     public function create(AppointmentModel $appointment): void
     {
         $sql = 'INSERT INTO appointments
-                    (salonId, serviceId, specialistId, customerId, startsAt)
+                    (salonId, serviceId, specialistId, customerId, startsAt, endsAt)
                 VALUES
-                    (:salonId, :serviceId, :specialistId, :customerId, :startsAt)';
+                    (:salonId, :serviceId, :specialistId, :customerId, :startsAt, :endAt)';
 
         $stmt = $this->getConnection()->prepare($sql);
         $stmt->execute([
@@ -64,7 +66,8 @@ class AppointmentsRepository extends Repository implements IAppointmentsReposito
             ':serviceId' => $appointment->serviceId,
             ':specialistId' => $appointment->specialistId,
             ':customerId' => $appointment->customerId,
-            ':startsAt' => $appointment->startsAt
+            ':startsAt' => $appointment->startsAt,
+            ':endAt' => $appointment->endsAt
         ]);
 
         $appointment->id = (int)$this->getConnection()->lastInsertId();
@@ -76,7 +79,8 @@ class AppointmentsRepository extends Repository implements IAppointmentsReposito
             SET serviceId = :serviceId,
                 specialistId = :specialistId,
                 customerId = :customerId,
-                startsAt = :startsAt
+                startsAt = :startsAt,
+                endsAt = :endsAt
             WHERE salonId = :salonId AND id = :id';
 
         $stmt = $this->getConnection()->prepare($sql);
@@ -86,7 +90,8 @@ class AppointmentsRepository extends Repository implements IAppointmentsReposito
             ':serviceId' => $appointment->serviceId,
             ':specialistId' => $appointment->specialistId,
             ':customerId' => $appointment->customerId,
-            ':startsAt' => $appointment->startsAt
+            ':startsAt' => $appointment->startsAt,
+            ':endsAt' => $appointment->endsAt
         ]);
     }
 
@@ -105,18 +110,21 @@ class AppointmentsRepository extends Repository implements IAppointmentsReposito
         int $salonId,
         int $specialistId,
         string $startsAt,
+        string $endsAt,
         ?int $ignoreAppointmentId = null
     ): bool {
         $sql = 'SELECT COUNT(*)
             FROM appointments
             WHERE salonId = :salonId
               AND specialistId = :specialistId
-              AND startsAt = :startsAt';
+              AND startsAt = :startsAt
+              AND endsAt = :endsAt';
 
         $params = [
             ':salonId' => $salonId,
             ':specialistId' => $specialistId,
             ':startsAt' => $startsAt,
+            ':endsAt' => $endsAt,
         ];
 
         if ($ignoreAppointmentId !== null) {
@@ -129,4 +137,30 @@ class AppointmentsRepository extends Repository implements IAppointmentsReposito
 
         return ((int)$stmt->fetchColumn()) === 0;
     }
+
+    public function getAppointmentsBySpecialistAndDate(int $salonId, int $specialistId, string $date): array
+    {
+        // date = 'YYYY-MM-DD'
+        $from = $date . ' 00:00:00';
+        $to = $date . ' 23:59:59';
+
+        $sql = 'SELECT id, salonId, serviceId, specialistId, customerId, startsAt, endsAt
+            FROM appointments
+            WHERE salonId = :salonId
+              AND specialistId = :specialistId
+              AND startsAt BETWEEN :from AND :to
+            ORDER BY startsAt';
+
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([
+            ':salonId' => $salonId,
+            ':specialistId' => $specialistId,
+            ':from' => $from,
+            ':to' => $to,
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_CLASS, '\App\Models\AppointmentModel');
+    }
+
+
 }

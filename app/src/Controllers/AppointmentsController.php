@@ -18,6 +18,20 @@ class AppointmentsController
         $this->service = new AppointmentsService();
     }
 
+    public function availableSlots($specialistId): void
+    {
+        $salonId = $this->getSalonId(); // from session or from query
+        $specialistId = (int)$specialistId;
+
+        $date = isset($_GET['date']) ? (string)$_GET['date'] : null; // YYYY-MM-DD
+
+        $slots = $this->service->getAvailableSlotsBySpecialist($salonId, $specialistId, $date);
+
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($slots, JSON_UNESCAPED_UNICODE);
+    }
+
+
     private function getSalonIdFromSession(): int
     {
         if (!isset($_SESSION['user']) || !isset($_SESSION['user']['salonId'])) {

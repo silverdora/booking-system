@@ -15,6 +15,10 @@ class AppointmentsService implements IAppointmentsService
     private IAppointmentsRepository $appointmentsRepository;
     private ISalonServicesRepository $salonServicesRepository;
     private IUsersRepository $usersRepository;
+    private const WORK_START = '09:00:00';
+    private const WORK_END = '21:00:00';
+    private const SLOT_MINUTES = 15;
+
 
     public function __construct()
     {
@@ -70,20 +74,37 @@ class AppointmentsService implements IAppointmentsService
 
         if ($appointment->serviceId <= 0) $errors[] = 'Service is required.';
         if ($appointment->specialistId <= 0) $errors[] = 'Specialist is required.';
-        if ($appointment->customerId <= 0) $errors[] = 'Customer is required.';
+        if ($appointment->customerId <= 0) $errors[] = 'Client is required.';
 
-        if (trim($appointment->startsAt) === '' ) {
-            $errors[] = 'Start time is required.';
+        if (trim($appointment->startsAt) === '' || trim($appointment->endsAt) === '') {
+            $errors[] = 'Start and end time are required.';
         } else {
-            $start = strtotime($appointment->startsAt);
-            if ($start === false) $errors[] = 'Invalid date/time format.';
+            $startTs = strtotime($appointment->startsAt);
+            $endTs = strtotime($appointment->endsAt);
+
+            if ($startTs === false || $endTs === false) {
+                $errors[] = 'Invalid date/time format.';
+            } else if ($endTs <= $startTs) {
+                $errors[] = 'End time must be after start time.';
+            } else {
+                // Check working hours boundaries
+                $startTime = date('H:i:s', $startTs);
+                $endTime = date('H:i:s', $endTs);
+
+                if ($startTime < self::WORK_START) {
+                    $errors[] = 'Start time cannot be earlier than 09:00.';
+                }
+                if ($endTime > self::WORK_END) {
+                    $errors[] = 'End time cannot be later than 21:00.';
+                }
+            }
         }
 
         if (!empty($errors)) {
-            // join so controller can split OR just display as a list
             throw new \InvalidArgumentException(implode("\n", $errors));
         }
     }
+
 
     public function getServiceOptions(int $salonId): array
     {
@@ -99,6 +120,93 @@ class AppointmentsService implements IAppointmentsService
     {
         return $this->usersRepository->getCustomerOptions();
     }
+
+    /**
+     * @return array<int, array{startsAt:string, endsAt:string}>
+     */
+    public function getAvailableSlotsBySpecialist(
+        int $salonId,
+        int $specialistId,
+        string $date,
+        int $durationMinutes
+    ): array {
+        if ($durationMinutes <= 0) {
+            throw new \InvalidArgumentException('Invalid service duration.');
+        }
+
+        $appointments = $this->appointmentsRepository
+            ->getAppointmentsBySpecialistAndDate($salonId, $specialistId, $date);
+
+        $workStart = new \DateTimeImmutable($date . ' ' . self::WORK_START);
+        $workEnd = new \DateTimeImmutable($date . ' ' . self::WORK_END);
+
+        $slotStep = new \DateInterval('PT' . self::SLOT_MINUTES . 'M');
+        $serviceLen = new \DateInterval('PT' . (int)$durationMinutes . 'M');
+
+        $available = [];
+
+        for ($slotStart = $workStart; $slotStart < $workEnd; $slotStart = $slotStart->add($slotStep)) {
+            $slotEnd = $slotStart->add($serviceLen);
+
+            // service should end before 21:00
+            if ($slotEnd > $workEnd) {
+                break;
+            }
+
+            $conflict = false;
+
+            foreach ($appointments as $appt) {
+                $apptStart = new \DateTimeImmutable((string)$appt->startsAt);
+                $apptEnd = new \DateTimeImmutable((string)$appt->endsAt);
+
+                // intervals overlap
+                if ($slotStart < $apptEnd && $slotEnd > $apptStart) {
+                    $conflict = true;
+                    break;
+                }
+            }
+
+            if (!$conflict) {
+                $available[] = [
+                    'startsAt' => $slotStart->format('Y-m-d H:i:s'),
+                    'endsAt' => $slotEnd->format('Y-m-d H:i:s'),
+                ];
+            }
+        }
+
+        return $available;
+    }
+    /**
+     * @return array<int, array{specialist:array{id:int,name:string}, slots:array<int, array{startsAt:string, endsAt:string}>}>
+     */
+    public function getSpecialistsWithSlots(int $salonId, int $serviceId, string $date): array
+    {
+        $service = $this->salonServicesRepository->getById($salonId, $serviceId);
+        if (!$service) {
+            throw new \InvalidArgumentException('Service not found.');
+        }
+
+        $duration = (int)$service->durationMinutes;
+        if ($duration <= 0) {
+            throw new \InvalidArgumentException('Service duration not set.');
+        }
+
+        $specialists = $this->usersRepository->getSpecialistOptions($salonId);
+
+        $result = [];
+
+        foreach ($specialists as $sp) {
+            $slots = $this->getAvailableSlotsBySpecialist($salonId, (int)$sp['id'], $date, $duration);
+
+            $result[] = [
+                'specialist' => $sp,
+                'slots' => $slots,
+            ];
+        }
+
+        return $result;
+    }
+
 
 }
 
