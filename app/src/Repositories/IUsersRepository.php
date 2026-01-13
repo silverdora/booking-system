@@ -16,4 +16,7 @@ interface IUsersRepository
     public function createUser(array $data): int;
     public function getSpecialistOptions(int $salonId): array;
     public function getCustomerOptions(): array;
+
+    /** @return array<int, array{id:int, name:string}> */
+    public function getSpecialistOptionsBySalonService(int $salonId, int $salonServiceId): array;
 }

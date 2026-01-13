@@ -58,7 +58,7 @@ class AppointmentsRepository extends Repository implements IAppointmentsReposito
         $sql = 'INSERT INTO appointments
                     (salonId, serviceId, specialistId, customerId, startsAt, endsAt)
                 VALUES
-                    (:salonId, :serviceId, :specialistId, :customerId, :startsAt, :endAt)';
+                    (:salonId, :serviceId, :specialistId, :customerId, :startsAt, :endsAt)';
 
         $stmt = $this->getConnection()->prepare($sql);
         $stmt->execute([
@@ -67,7 +67,7 @@ class AppointmentsRepository extends Repository implements IAppointmentsReposito
             ':specialistId' => $appointment->specialistId,
             ':customerId' => $appointment->customerId,
             ':startsAt' => $appointment->startsAt,
-            ':endAt' => $appointment->endsAt
+            ':endsAt' => $appointment->endsAt
         ]);
 
         $appointment->id = (int)$this->getConnection()->lastInsertId();
@@ -117,8 +117,8 @@ class AppointmentsRepository extends Repository implements IAppointmentsReposito
             FROM appointments
             WHERE salonId = :salonId
               AND specialistId = :specialistId
-              AND startsAt = :startsAt
-              AND endsAt = :endsAt';
+              AND startsAt < :endsAt
+              AND endsAt > :startsAt';
 
         $params = [
             ':salonId' => $salonId,
@@ -137,6 +137,7 @@ class AppointmentsRepository extends Repository implements IAppointmentsReposito
 
         return ((int)$stmt->fetchColumn()) === 0;
     }
+
 
     public function getAppointmentsBySpecialistAndDate(int $salonId, int $specialistId, string $date): array
     {
@@ -161,6 +162,7 @@ class AppointmentsRepository extends Repository implements IAppointmentsReposito
 
         return $stmt->fetchAll(PDO::FETCH_CLASS, '\App\Models\AppointmentModel');
     }
+
 
 
 }

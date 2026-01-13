@@ -16,6 +16,8 @@ $salon = $vm->salon;
 <a href="/salons/<?= htmlspecialchars((string)$salon->id) ?>/edit">Edit</a>
 <h1><?= htmlspecialchars($salon->name) ?></h1>
 
+<a href="/salons/<?= (int)$salon->id ?>/book">Book an appointment</a>
+
 <?php if (!empty($salon->type)) : ?>
     <p><strong>Type:</strong> <?= htmlspecialchars($salon->type) ?></p>
 <?php endif; ?>

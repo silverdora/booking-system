@@ -79,6 +79,12 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET',  '/appointments',                 ['App\Controllers\AppointmentsController', 'index']);
 
     // Create form + store
+    // Customer booking flow
+    $r->addRoute('GET',  '/salons/{salonId:\d+}/book',                 ['App\Controllers\AppointmentsController', 'bookChooseService']);
+    $r->addRoute('GET',  '/salons/{salonId:\d+}/book/date',            ['App\Controllers\AppointmentsController', 'bookChooseDate']);
+    $r->addRoute('GET',  '/salons/{salonId:\d+}/book/slots',           ['App\Controllers\AppointmentsController', 'bookChooseSlot']);
+    $r->addRoute('POST', '/salons/{salonId:\d+}/book/confirm',         ['App\Controllers\AppointmentsController', 'bookConfirm']);
+
     $r->addRoute('GET',  '/appointments/create',          ['App\Controllers\AppointmentsController', 'create']);
     $r->addRoute('POST', '/appointments/create',          ['App\Controllers\AppointmentsController', 'store']);
 

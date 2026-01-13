@@ -23,6 +23,7 @@ interface IAppointmentsRepository
     public function getAppointmentsBySpecialistAndDate(int $salonId, int $specialistId, string $date): array;
 
 
+
 }
 
 

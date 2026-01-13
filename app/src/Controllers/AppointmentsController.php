@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Framework\Authentication;
 use App\Models\AppointmentModel;
 use App\Services\IAppointmentsService;
 use App\Services\AppointmentsService;
@@ -16,6 +17,83 @@ class AppointmentsController
     public function __construct()
     {
         $this->service = new AppointmentsService();
+    }
+    private function requireCustomer(): void
+    {
+        Authentication::requireRole(['customer']);
+    }
+
+    public function bookChooseService($salonId): void
+    {
+        //var_dump($_SESSION['user']); exit;
+
+        $this->requireCustomer();
+        $salonId = (int)$salonId;
+
+        // list of salon services
+        $services = $this->service->getServiceOptions($salonId);
+
+        $title = 'Choose service';
+        require __DIR__ . '/../Views/appointments/choose_service.php';
+    }
+    public function bookChooseDate($salonId): void
+    {
+        $this->requireCustomer();
+        $salonId = (int)$salonId;
+
+        $serviceId = (int)($_GET['serviceId'] ?? 0);
+        if ($serviceId <= 0) {
+            http_response_code(400);
+            echo 'serviceId is required.';
+            return;
+        }
+
+        // View: choose date (calendar)
+        $title = 'Choose date';
+        require __DIR__ . '/../Views/appointments/choose_date.php';
+    }
+
+    public function bookChooseSlot($salonId): void
+    {
+        $this->requireCustomer();
+        $salonId = (int)$salonId;
+
+        $serviceId = (int)($_GET['serviceId'] ?? 0);
+        $date = (string)($_GET['date'] ?? '');
+
+        if ($serviceId <= 0 || $date === '') {
+            http_response_code(400);
+            echo 'serviceId and date are required.';
+            return;
+        }
+
+        try {
+            $specialistsWithSlots = $this->service->getSpecialistsWithSlots($salonId, $serviceId, $date);
+
+            $title = 'Choose slot';
+            require __DIR__ . '/../Views/appointments/choose_slot.php';
+        } catch (\InvalidArgumentException $e) {
+            http_response_code(400);
+            echo $e->getMessage();
+        }
+    }
+
+    public function bookConfirm($salonId): void
+    {
+        $this->requireCustomer();
+        $salonId = (int)$salonId;
+
+        try {
+            $appointment = new AppointmentModel($_POST);
+            $appointment->customerId = (int)($_SESSION['user']['id'] ?? 0);
+            $this->service->create($salonId, $appointment);
+
+            header('Location: /appointments'); // or "success" page
+            exit;
+        } catch (\InvalidArgumentException $e) {
+            http_response_code(400);
+            echo $e->getMessage();
+        }
     }
 
     public function availableSlots($specialistId): void

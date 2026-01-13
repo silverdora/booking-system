@@ -27,7 +27,8 @@ final class Authentication
     {
         self::requireLogin();
 
-        $role = $_SESSION['user']['role'] ?? null;
+        $role = strtolower(trim((string)($_SESSION['user']['role'] ?? '')));
+
         if ($role === null || !in_array($role, $roles, true)) {
             http_response_code(403);
             echo 'Forbidden';
@@ -39,12 +40,15 @@ final class Authentication
     {
         $_SESSION['user'] = [
             'id' => (int)$userRow['id'],
-            'role' => (string)$userRow['role'],
+            'role' => strtolower(trim((string)($userRow['role'] ?? ''))),
             'firstName' => (string)($userRow['firstName'] ?? ''),
             'lastName' => (string)($userRow['lastName'] ?? ''),
-            'salonId' => isset($userRow['salonId']) ? (int)$userRow['salonId'] : null,
+            'salonId' => isset($userRow['salonId']) && $userRow['salonId'] !== null
+                ? (int)$userRow['salonId']
+                : null,
         ];
     }
+
 
     public static function logout(): void
     {

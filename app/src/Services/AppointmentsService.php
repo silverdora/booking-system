@@ -42,9 +42,15 @@ class AppointmentsService implements IAppointmentsService
         $appointment->salonId = $salonId;
         $this->validate($appointment);
         // server-side availability validation
-        if (!$this->appointmentsRepository->isSpecialistAvailable($salonId, $appointment->specialistId, $appointment->startsAt)) {
+        if (!$this->appointmentsRepository->isSpecialistAvailable(
+            $salonId,
+            $appointment->specialistId,
+            $appointment->startsAt,
+            $appointment->endsAt
+        )) {
             throw new \InvalidArgumentException('This specialist is not available for the selected time slot.');
         }
+
         $this->appointmentsRepository->create($appointment);
     }
 
@@ -55,10 +61,15 @@ class AppointmentsService implements IAppointmentsService
         $appointment->id = $id;
         $this->validate($appointment);
 
-        if (!$this->appointmentsRepository->isSpecialistAvailable($salonId, $appointment->specialistId, $appointment->startsAt, $id)) {
+        if (!$this->appointmentsRepository->isSpecialistAvailable(
+            $salonId,
+            $appointment->specialistId,
+            $appointment->startsAt,
+            $appointment->endsAt,
+            $id
+        )) {
             throw new \InvalidArgumentException('This specialist is not available for the selected time slot.');
         }
-
 
         $this->appointmentsRepository->update($salonId, $id, $appointment);
     }
@@ -120,7 +131,6 @@ class AppointmentsService implements IAppointmentsService
     {
         return $this->usersRepository->getCustomerOptions();
     }
-
     /**
      * @return array<int, array{startsAt:string, endsAt:string}>
      */
@@ -140,15 +150,15 @@ class AppointmentsService implements IAppointmentsService
         $workStart = new \DateTimeImmutable($date . ' ' . self::WORK_START);
         $workEnd = new \DateTimeImmutable($date . ' ' . self::WORK_END);
 
-        $slotStep = new \DateInterval('PT' . self::SLOT_MINUTES . 'M');
-        $serviceLen = new \DateInterval('PT' . (int)$durationMinutes . 'M');
+        $step = new \DateInterval('PT' . self::SLOT_MINUTES . 'M');
+        $len = new \DateInterval('PT' . (int)$durationMinutes . 'M');
 
         $available = [];
 
-        for ($slotStart = $workStart; $slotStart < $workEnd; $slotStart = $slotStart->add($slotStep)) {
-            $slotEnd = $slotStart->add($serviceLen);
+        for ($slotStart = $workStart; $slotStart < $workEnd; $slotStart = $slotStart->add($step)) {
+            $slotEnd = $slotStart->add($len);
 
-            // service should end before 21:00
+            // услуга должна закончиться не позже 21:00
             if ($slotEnd > $workEnd) {
                 break;
             }
@@ -159,7 +169,8 @@ class AppointmentsService implements IAppointmentsService
                 $apptStart = new \DateTimeImmutable((string)$appt->startsAt);
                 $apptEnd = new \DateTimeImmutable((string)$appt->endsAt);
 
-                // intervals overlap
+                // Пересечение интервалов:
+                // slotStart < apptEnd && slotEnd > apptStart
                 if ($slotStart < $apptEnd && $slotEnd > $apptStart) {
                     $conflict = true;
                     break;
@@ -177,10 +188,14 @@ class AppointmentsService implements IAppointmentsService
         return $available;
     }
     /**
-     * @return array<int, array{specialist:array{id:int,name:string}, slots:array<int, array{startsAt:string, endsAt:string}>}>
+     * @return array<int, array{
+     *   specialist: array{id:int, name:string},
+     *   slots: array<int, array{startsAt:string, endsAt:string}>
+     * }>
      */
     public function getSpecialistsWithSlots(int $salonId, int $serviceId, string $date): array
     {
+
         $service = $this->salonServicesRepository->getById($salonId, $serviceId);
         if (!$service) {
             throw new \InvalidArgumentException('Service not found.');
@@ -188,15 +203,20 @@ class AppointmentsService implements IAppointmentsService
 
         $duration = (int)$service->durationMinutes;
         if ($duration <= 0) {
-            throw new \InvalidArgumentException('Service duration not set.');
+            throw new \InvalidArgumentException('Service duration is required.');
         }
 
-        $specialists = $this->usersRepository->getSpecialistOptions($salonId);
+        $specialists = $this->usersRepository->getSpecialistOptionsBySalonService($salonId, $serviceId);
 
         $result = [];
 
         foreach ($specialists as $sp) {
-            $slots = $this->getAvailableSlotsBySpecialist($salonId, (int)$sp['id'], $date, $duration);
+            $slots = $this->getAvailableSlotsBySpecialist(
+                $salonId,
+                (int)$sp['id'],
+                $date,
+                $duration
+            );
 
             $result[] = [
                 'specialist' => $sp,
@@ -206,6 +226,7 @@ class AppointmentsService implements IAppointmentsService
 
         return $result;
     }
+
 
 
 }

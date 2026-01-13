@@ -8,6 +8,33 @@ use PDO;
 
 class UsersRepository extends Repository implements IUsersRepository
 {
+    public function getSpecialistOptionsBySalonService(int $salonId, int $salonServiceId): array
+    {
+        $sql = 'SELECT u.id, u.firstName, u.lastName
+            FROM specialistSalonServices sss
+            INNER JOIN salonServices ss ON ss.id = sss.salonServiceId
+            INNER JOIN users u ON u.id = sss.specialistId
+            WHERE ss.salonId = :salonId
+              AND ss.id = :salonServiceId
+              AND u.role = "specialist"
+            ORDER BY u.lastName, u.firstName';
+
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([
+            ':salonId' => $salonId,
+            ':salonServiceId' => $salonServiceId,
+        ]);
+
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(function ($row) {
+            $fullName = trim(($row['firstName'] ?? '') . ' ' . ($row['lastName'] ?? ''));
+            return [
+                'id' => (int)$row['id'],
+                'name' => $fullName !== '' ? $fullName : ('Specialist #' . (int)$row['id']),
+            ];
+        }, $rows);
+    }
     public function getAllByRole(string $role): array
     {
         $sql = 'SELECT id, role, firstName, lastName, email, phone, salonId, password
