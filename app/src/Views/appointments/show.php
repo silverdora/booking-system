@@ -8,7 +8,7 @@ $title = $vm->title;
 require __DIR__ . '/../partials/header.php';
 
 $appointment = $vm->appointment;
-$isCustomer = $vm->isCustomer;
+
 ?>
 
 <p>
@@ -26,17 +26,18 @@ $isCustomer = $vm->isCustomer;
 <p><strong>End:</strong> <?= htmlspecialchars($vm->appointment->endsAt) ?></p>
 
 
-<?php if (!$isCustomer) : ?>
+<?php if ($vm->canManage) : ?>
     <p>
         <a href="/appointments/<?= htmlspecialchars((string)$appointment->id) ?>/edit">Edit</a>
-    </p>
 
     <form action="/appointments/<?= htmlspecialchars((string)$appointment->id) ?>/delete"
-          method="post"
+          method="post" style="display:inline"
           onsubmit="return confirm('Delete this appointment?');">
-        <button type="submit">Delete</button>
+        <button type="submit">Cancel/Delete</button>
     </form>
+    </p>
 <?php endif; ?>
+
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>
 

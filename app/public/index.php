@@ -88,6 +88,13 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET',  '/appointments/create',          ['App\Controllers\AppointmentsController', 'create']);
     $r->addRoute('POST', '/appointments/create',          ['App\Controllers\AppointmentsController', 'store']);
 
+    // Receptionist booking flow
+    $r->addRoute('GET',  '/appointments/receptionist/create',  ['App\Controllers\AppointmentsController', 'receptionistChooseService']);
+    $r->addRoute('GET',  '/appointments/receptionist/date',    ['App\Controllers\AppointmentsController', 'receptionistChooseDate']);
+    $r->addRoute('GET',  '/appointments/receptionist/slots',   ['App\Controllers\AppointmentsController', 'receptionistChooseSlot']);
+    $r->addRoute('POST', '/appointments/receptionist/confirm', ['App\Controllers\AppointmentsController', 'receptionistConfirm']);
+
+
     // Detail
     $r->addRoute('GET',  '/appointments/{id:\d+}',        ['App\Controllers\AppointmentsController', 'show']);
 

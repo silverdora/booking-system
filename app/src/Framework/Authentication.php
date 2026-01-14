@@ -2,6 +2,8 @@
 
 namespace App\Framework;
 
+use App\Enums\UserRole;
+
 final class Authentication
 {
     public static function isLoggedIn(): bool
@@ -27,14 +29,31 @@ final class Authentication
     {
         self::requireLogin();
 
-        $role = strtolower(trim((string)($_SESSION['user']['role'] ?? '')));
+        $userRoleRaw = $_SESSION['user']['role'] ?? '';
+        $userRole = strtolower(trim(self::roleToString($userRoleRaw)));
 
-        if ($role === null || !in_array($role, $roles, true)) {
+        $allowed = array_map(function ($r) {
+            return strtolower(trim(self::roleToString($r)));
+        }, $roles);
+
+        if (!in_array($userRole, $allowed, true)) {
             http_response_code(403);
             echo 'Forbidden';
             exit;
         }
     }
+
+    /**
+     * @param mixed $role
+     */
+    private static function roleToString($role): string
+    {
+        if ($role instanceof UserRole) {
+            return $role->value; //enum to string
+        }
+        return (string)$role; //string/int/etc
+    }
+
 
     public static function login(array $userRow): void
     {

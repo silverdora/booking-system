@@ -44,11 +44,19 @@ class AppointmentsService implements IAppointmentsService
     {
         $appointments = $this->appointmentsRepository->getAllByCustomerId($customerId);
 
-        $items = array_map(function (AppointmentModel $a) {
-            return $this->mapListItem($a);
-        }, $appointments);
+        $items = array_map(fn(AppointmentModel $a) => $this->mapListItem($a), $appointments);
 
-        return new AppointmentsViewModel(null,$items, 'My appointments' );
+        return new AppointmentsViewModel(
+            null,
+            $items,
+            'My appointments',
+            true,   // isCustomer
+            true,   // canCreate
+            false,  // canManage
+            'Book new appointment',
+            '/salons',
+            false
+        );
     }
     public function buildIndexViewModelForSalon(int $salonId): AppointmentsViewModel
     {
@@ -57,18 +65,27 @@ class AppointmentsService implements IAppointmentsService
         $salonName = $this->getSalonName($salonId);
         $title = $salonName !== '' ? "Appointments — {$salonName}" : "Appointments (Salon #{$salonId})";
 
-        $items = array_map(function (AppointmentModel $a) {
-            return $this->mapListItem($a);
-        }, $appointments);
+        $items = array_map(fn(AppointmentModel $a) => $this->mapListItem($a), $appointments);
 
-        return new AppointmentsViewModel($salonId, $items, $title);
+        return new AppointmentsViewModel(
+            $salonId,
+            $items,
+            $title,
+            false,  // isCustomer
+            true,   // canCreate (receptionist)
+            true,   // canManage (edit/delete)
+            'Create appointment',
+            '/appointments/receptionist/create',
+            true
+        );
     }
+
     public function buildDetailViewModelForCustomer(int $customerId, int $appointmentId): ?AppointmentDetailViewModel
     {
         $appointment = $this->appointmentsRepository->getByIdForCustomer($customerId, $appointmentId);
         if (!$appointment) return null;
 
-        return $this->mapDetailItem($appointment, true);
+        return $this->mapDetailItem($appointment, true, false);
     }
 
     public function buildDetailViewModelForSalon(int $salonId, int $appointmentId): ?AppointmentDetailViewModel
@@ -76,8 +93,9 @@ class AppointmentsService implements IAppointmentsService
         $appointment = $this->appointmentsRepository->getById($salonId, $appointmentId);
         if (!$appointment) return null;
 
-        return $this->mapDetailItem($appointment, false);
+        return $this->mapDetailItem($appointment, false, true);
     }
+
     private function mapListItem(AppointmentModel $a): AppointmentsListItemViewModel
     {
         $salonName = $this->getSalonName((int)$a->salonId);
@@ -93,7 +111,7 @@ class AppointmentsService implements IAppointmentsService
             $customerName
         );
     }
-    private function mapDetailItem(AppointmentModel $a, bool $isCustomer): AppointmentDetailViewModel
+    private function mapDetailItem(AppointmentModel $a, bool $isCustomer, bool $canManage): AppointmentDetailViewModel
     {
         $salonName = $this->getSalonName((int)$a->salonId);
         $serviceName = $this->getServiceName((int)$a->serviceId);
@@ -103,12 +121,14 @@ class AppointmentsService implements IAppointmentsService
         return new AppointmentDetailViewModel(
             $a,
             $isCustomer,
+            $canManage,
             $salonName,
             $serviceName,
             $specialistName,
             $customerName
         );
     }
+
     private function getServiceName(int $serviceId): string
     {
         if ($serviceId <= 0) return '';
@@ -285,7 +305,7 @@ class AppointmentsService implements IAppointmentsService
         for ($slotStart = $workStart; $slotStart < $workEnd; $slotStart = $slotStart->add($step)) {
             $slotEnd = $slotStart->add($len);
 
-            // услуга должна закончиться не позже 21:00
+            // service should end not later that at 21:00
             if ($slotEnd > $workEnd) {
                 break;
             }
@@ -296,7 +316,6 @@ class AppointmentsService implements IAppointmentsService
                 $apptStart = new \DateTimeImmutable((string)$appt->startsAt);
                 $apptEnd = new \DateTimeImmutable((string)$appt->endsAt);
 
-                // Пересечение интервалов:
                 // slotStart < apptEnd && slotEnd > apptStart
                 if ($slotStart < $apptEnd && $slotEnd > $apptStart) {
                     $conflict = true;

@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Enums\UserRole;
 use App\Framework\Authentication;
 use App\Models\AppointmentModel;
 use App\Services\IAppointmentsService;
@@ -18,15 +19,93 @@ class AppointmentsController
     {
         $this->service = new AppointmentsService();
     }
+    public function receptionistChooseService(): void
+    {
+        $this->requireReceptionist();
+        $salonId = $this->getSalonIdFromSession();
+
+        $services = $this->service->getServiceOptions($salonId);
+        $customers = $this->service->getCustomerOptions();
+
+        $title = 'Create appointment — choose customer & service';
+        require __DIR__ . '/../Views/appointments/receptionist_choose_service.php';
+    }
+
+    public function receptionistChooseDate(): void
+    {
+        $this->requireReceptionist();
+        $salonId = $this->getSalonIdFromSession();
+
+        $serviceId = (int)($_GET['serviceId'] ?? 0);
+        $customerId = (int)($_GET['customerId'] ?? 0);
+
+        if ($serviceId <= 0 || $customerId <= 0) {
+            http_response_code(400);
+            echo 'serviceId and customerId are required.';
+            return;
+        }
+
+        $title = 'Create appointment — choose date';
+        require __DIR__ . '/../Views/appointments/receptionist_choose_date.php';
+    }
+
+    public function receptionistChooseSlot(): void
+    {
+        $this->requireReceptionist();
+        $salonId = $this->getSalonIdFromSession();
+
+        $serviceId = (int)($_GET['serviceId'] ?? 0);
+        $customerId = (int)($_GET['customerId'] ?? 0);
+        $date = (string)($_GET['date'] ?? '');
+
+        if ($serviceId <= 0 || $customerId <= 0 || $date === '') {
+            http_response_code(400);
+            echo 'serviceId, customerId and date are required.';
+            return;
+        }
+
+        try {
+            $specialistsWithSlots = $this->service->getSpecialistsWithSlots($salonId, $serviceId, $date);
+
+            $title = 'Create appointment — choose slot';
+            require __DIR__ . '/../Views/appointments/receptionist_choose_slot.php';
+        } catch (\InvalidArgumentException $e) {
+            http_response_code(400);
+            echo $e->getMessage();
+        }
+    }
+
+    public function receptionistConfirm(): void
+    {
+        $this->requireReceptionist();
+        $salonId = $this->getSalonIdFromSession();
+
+        try {
+            $appointment = new AppointmentModel($_POST);
+            $appointment->salonId = $salonId;
+
+            $this->service->create($salonId, $appointment);
+
+            header('Location: /appointments');
+            exit;
+        } catch (\InvalidArgumentException $e) {
+            http_response_code(400);
+            echo $e->getMessage();
+        }
+    }
+
+    private function requireReceptionist(): void
+    {
+        Authentication::requireRole([UserRole::Receptionist, UserRole::Owner]);
+    }
+
     private function requireCustomer(): void
     {
-        Authentication::requireRole(['customer']);
+        Authentication::requireRole([UserRole::Customer]);
     }
 
     public function bookChooseService($salonId): void
     {
-        //var_dump($_SESSION['user']); exit;
-
         $this->requireCustomer();
         $salonId = (int)$salonId;
 
@@ -89,7 +168,7 @@ class AppointmentsController
             $appointment->customerId = (int)($_SESSION['user']['id'] ?? 0);
             $this->service->create($salonId, $appointment);
 
-            header('Location: /appointments'); // or "success" page
+            header('Location: /appointments');
             exit;
         } catch (\InvalidArgumentException $e) {
             http_response_code(400);
@@ -159,7 +238,7 @@ class AppointmentsController
         $role = strtolower(trim((string)($_SESSION['user']['role'] ?? '')));
         $userId = (int)($_SESSION['user']['id'] ?? 0);
 
-        if ($role === 'customer') {
+        if ($role === strtolower(UserRole::Customer->value)) {
             if ($userId <= 0) {
                 http_response_code(403);
                 echo 'Not logged in.';
@@ -176,10 +255,10 @@ class AppointmentsController
         require __DIR__ . '/../Views/appointments/index.php';
     }
 
-
-
     public function create(): void
     {
+        $this->requireReceptionist();
+
         $salonId = $this->getSalonIdFromSession();
         $appointment = new AppointmentModel(['salonId' => $salonId]);
         $services = $this->service->getServiceOptions($salonId);
@@ -204,6 +283,8 @@ class AppointmentsController
 
     public function store(): void
     {
+        $this->requireReceptionist();
+
         $salonId = $this->getSalonIdFromSession();
 
         try {
@@ -239,9 +320,9 @@ class AppointmentsController
         $id = (int)$id;
         $role = strtolower(trim((string)($_SESSION['user']['role'] ?? '')));
         $userId = (int)($_SESSION['user']['id'] ?? 0);
-        $isCustomer = ($role === 'customer');
+        $isCustomer = ($role === strtolower(UserRole::Customer->value));
 
-        if ($role === 'customer') {
+        if ($role === strtolower(UserRole::Customer->value)) {
             $vm = $this->service->buildDetailViewModelForCustomer($userId, $id);
         } else {
             $salonId = $this->getSalonIdFromSession();
@@ -262,7 +343,7 @@ class AppointmentsController
     {
         $salonId = $this->getSalonIdFromSession();
         $id = (int)$id;
-
+        $this->requireReceptionist();
         $appointment = $this->service->getById($salonId, $id);
         if (!$appointment) {
             http_response_code(404);
@@ -292,6 +373,7 @@ class AppointmentsController
 
     public function update($id): void
     {
+        $this->requireReceptionist();
         $salonId = $this->getSalonIdFromSession();
         $id = (int)$id;
 
@@ -332,6 +414,8 @@ class AppointmentsController
 
     public function delete($id): void
     {
+        $this->requireReceptionist();
+
         $salonId = $this->getSalonIdFromSession();
         $id = (int)$id;
 

@@ -7,11 +7,10 @@ $title = $vm->title;
 
 require __DIR__ . '/../partials/header.php';
 
-$role = strtolower(trim((string)($_SESSION['user']['role'] ?? '')));
-$isCustomer = ($role === 'customer');
+
 ?>
 
-<?php if (!$isCustomer && $vm->salonId !== null) : ?>
+<?php if ($vm->showBackToSalonLink && $vm->salonId !== null) : ?>
     <p>
         <a href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>">&larr; Back to salon</a>
     </p>
@@ -19,13 +18,10 @@ $isCustomer = ($role === 'customer');
 
 <h1><?= htmlspecialchars($vm->title) ?></h1>
 
-<p>
-    <?php if ($isCustomer) : ?>
-        <a href="/salons">Book new appointment</a>
-    <?php else : ?>
-        <a href="/appointments/create">Create appointment</a>
-    <?php endif; ?>
-</p>
+<?php if ($vm->primaryActionUrl && $vm->primaryActionText) : ?>
+    <p><a href="<?= htmlspecialchars($vm->primaryActionUrl) ?>"><?= htmlspecialchars($vm->primaryActionText) ?></a></p>
+<?php endif; ?>
+
 <?php if (count($vm->appointments)>0) : ?>
     <ul>
         <?php foreach ($vm->appointments as $item) : ?>
@@ -50,17 +46,18 @@ $isCustomer = ($role === 'customer');
                     <?= htmlspecialchars($a->startsAt) ?> → <?= htmlspecialchars($a->endsAt) ?>
                 </div>
 
-                <?php if (!$isCustomer) : ?>
+                <?php if ($vm->canManage) : ?>
                     <p>
                         <a href="/appointments/<?= htmlspecialchars((string)$a->id) ?>/edit">Edit</a>
 
                     <form action="/appointments/<?= htmlspecialchars((string)$a->id) ?>/delete"
                           method="post" style="display:inline"
                           onsubmit="return confirm('Delete this appointment?');">
-                        <button type="submit">Delete</button>
+                        <button type="submit">Cancel/Delete</button>
                     </form>
                     </p>
                 <?php endif; ?>
+
             </li>
         <?php endforeach; ?>
     </ul>

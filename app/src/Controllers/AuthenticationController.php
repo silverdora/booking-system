@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Enums\UserRole;
 use App\Framework\Authentication;
 use App\Services\IAuthenticationService;
 use App\Services\AuthenticationService;
@@ -32,8 +33,8 @@ class AuthenticationController
             $user = $this->authenticationService->login($email, $password);
             Authentication::login($user);
 
-            // Redirect per role (simple default)
-            if ($user['role'] === 'customer') {
+            // Redirect per role
+            if ($user['role'] === strtolower(UserRole::Customer->value)) {
                 header('Location: /salons');
             } else {
                 // owner goes to salons (or dashboard)
@@ -70,7 +71,7 @@ class AuthenticationController
             // After registration:
             // customer -> book appointment
             // owner -> create salon
-            if ($user['role'] === 'customer') {
+            if ($user['role'] === strtolower(UserRole::Customer->value)) {
                 header('Location: /salons');
             } else {
                 header('Location: /salons/create');

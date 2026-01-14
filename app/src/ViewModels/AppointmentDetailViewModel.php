@@ -15,10 +15,12 @@ class AppointmentDetailViewModel
     public string $serviceName;
     public string $specialistName;
     public string $customerName;
+    public bool $canManage;
 
     public function __construct(
         AppointmentModel $appointment,
         bool $isCustomer,
+        bool $canManage,
         string $salonName,
         string $serviceName,
         string $specialistName,
@@ -26,6 +28,7 @@ class AppointmentDetailViewModel
     ) {
         $this->appointment = $appointment;
         $this->isCustomer = $isCustomer;
+        $this->canManage = $canManage;
 
         $this->salonName = $salonName;
         $this->serviceName = $serviceName;

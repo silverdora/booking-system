@@ -38,7 +38,6 @@ class SalonController
         $this->salonService->create($salon);
 
         // Redirect back to archive so the new salon shows up
-        //add success page later
         header('Location: /salons');
         exit;
     }
@@ -48,7 +47,7 @@ class SalonController
     {
         $salon = $this->salonService->getById($id);
         if ($salon === null) {
-            // simple 404 for now
+            // simple 404
             http_response_code(404);
             echo "Salon not found";
             return;
