@@ -11,5 +11,7 @@ interface ISalonRepository
     public function getById(int $id): ?SalonModel;
     public function update(int $id, SalonModel $salon): void;
     public function delete(int $id): void;
+    public function getNameById(int $id): ?string;
+
 }
 ?>

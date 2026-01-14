@@ -3,12 +3,8 @@
 namespace App\ViewModels;
 
 use App\Models\AppointmentModel;
-
-class AppointmentDetailViewModel
+class AppointmentsListItemViewModel
 {
-    public string $title;
-    public bool $isCustomer;
-
     public AppointmentModel $appointment;
 
     public string $salonName;
@@ -18,22 +14,15 @@ class AppointmentDetailViewModel
 
     public function __construct(
         AppointmentModel $appointment,
-        bool $isCustomer,
         string $salonName,
         string $serviceName,
         string $specialistName,
         string $customerName
     ) {
         $this->appointment = $appointment;
-        $this->isCustomer = $isCustomer;
-
         $this->salonName = $salonName;
         $this->serviceName = $serviceName;
         $this->specialistName = $specialistName;
         $this->customerName = $customerName;
-
-        $this->title = "Appointment #{$appointment->id} — {$serviceName}";
     }
 }
-
-

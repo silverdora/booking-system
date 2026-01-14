@@ -20,5 +20,6 @@ interface IUsersRepository
     /** @return array<int, array{id:int, name:string}> */
     public function getSpecialistOptionsByServiceId(int $serviceId): array;
     public function specialistCanDoService(int $specialistId, int $serviceId): bool;
+    public function getFullNameById(int $id): ?string;
 
 }

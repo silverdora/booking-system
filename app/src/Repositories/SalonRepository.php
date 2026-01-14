@@ -69,7 +69,6 @@ class SalonRepository extends Repository implements ISalonRepository
         ]);
     }
 
-
     public function delete(int $id): void
     {
         $sql = 'DELETE FROM salons WHERE id = :id';
@@ -77,4 +76,13 @@ class SalonRepository extends Repository implements ISalonRepository
         $stmt->bindValue(':id', $id, \PDO::PARAM_INT);
         $stmt->execute();
     }
+    public function getNameById(int $id): ?string
+    {
+        $sql = 'SELECT name FROM salons WHERE id = :id';
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([':id' => $id]);
+        $name = $stmt->fetchColumn();
+        return $name !== false ? (string)$name : null;
+    }
+
 }

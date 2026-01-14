@@ -5,19 +5,32 @@ namespace App\Services;
 use App\Models\AppointmentModel;
 use App\Repositories\IAppointmentsRepository;
 use App\Repositories\AppointmentsRepository;
+use App\Repositories\ISalonRepository;
 use App\Repositories\ISalonServicesRepository;
+use App\Repositories\SalonRepository;
 use App\Repositories\SalonServicesRepository;
 use App\Repositories\IUsersRepository;
 use App\Repositories\UsersRepository;
+use App\ViewModels\AppointmentDetailViewModel;
+use App\ViewModels\AppointmentsListItemViewModel;
+use App\ViewModels\AppointmentsViewModel;
 
 class AppointmentsService implements IAppointmentsService
 {
     private IAppointmentsRepository $appointmentsRepository;
     private ISalonServicesRepository $salonServicesRepository;
     private IUsersRepository $usersRepository;
+    private ISalonRepository $salonRepository;
     private const WORK_START = '09:00:00';
     private const WORK_END = '21:00:00';
     private const SLOT_MINUTES = 15;
+
+    /** @var array<int, string> */
+    private array $serviceNameCache = [];
+    /** @var array<int, string> */
+    private array $userNameCache = [];
+    /** @var array<int, string> */
+    private array $salonNameCache = [];
 
 
     public function __construct()
@@ -25,8 +38,111 @@ class AppointmentsService implements IAppointmentsService
         $this->appointmentsRepository = new AppointmentsRepository();
         $this->salonServicesRepository = new SalonServicesRepository();
         $this->usersRepository = new UsersRepository();
+        $this->salonRepository = new SalonRepository();
+    }
+    public function buildIndexViewModelForCustomer(int $customerId): AppointmentsViewModel
+    {
+        $appointments = $this->appointmentsRepository->getAllByCustomerId($customerId);
+
+        $items = array_map(function (AppointmentModel $a) {
+            return $this->mapListItem($a);
+        }, $appointments);
+
+        return new AppointmentsViewModel('My appointments', true, $items);
+    }
+    public function buildIndexViewModelForSalon(int $salonId): AppointmentsViewModel
+    {
+        $appointments = $this->appointmentsRepository->getAllBySalonId($salonId);
+
+        $salonName = $this->getSalonName($salonId);
+        $title = $salonName !== '' ? "Appointments — {$salonName}" : "Appointments (Salon #{$salonId})";
+
+        $items = array_map(function (AppointmentModel $a) {
+            return $this->mapListItem($a);
+        }, $appointments);
+
+        return new AppointmentsViewModel($title, false, $items);
+    }
+    public function buildDetailViewModelForCustomer(int $customerId, int $appointmentId): ?AppointmentDetailViewModel
+    {
+        $appointment = $this->appointmentsRepository->getByIdForCustomer($customerId, $appointmentId);
+        if (!$appointment) return null;
+
+        return $this->mapDetailItem($appointment, true);
     }
 
+    public function buildDetailViewModelForSalon(int $salonId, int $appointmentId): ?AppointmentDetailViewModel
+    {
+        $appointment = $this->appointmentsRepository->getById($salonId, $appointmentId);
+        if (!$appointment) return null;
+
+        return $this->mapDetailItem($appointment, false);
+    }
+    private function mapListItem(AppointmentModel $a): AppointmentsListItemViewModel
+    {
+        $salonName = $this->getSalonName((int)$a->salonId);
+        $serviceName = $this->getServiceName((int)$a->serviceId);
+        $specialistName = $this->getUserName((int)$a->specialistId, 'Specialist');
+        $customerName = $this->getUserName((int)$a->customerId, 'Customer');
+
+        return new AppointmentsListItemViewModel(
+            $a,
+            $salonName,
+            $serviceName,
+            $specialistName,
+            $customerName
+        );
+    }
+    private function mapDetailItem(AppointmentModel $a, bool $isCustomer): AppointmentDetailViewModel
+    {
+        $salonName = $this->getSalonName((int)$a->salonId);
+        $serviceName = $this->getServiceName((int)$a->serviceId);
+        $specialistName = $this->getUserName((int)$a->specialistId, 'Specialist');
+        $customerName = $this->getUserName((int)$a->customerId, 'Customer');
+
+        return new AppointmentDetailViewModel(
+            $a,
+            $isCustomer,
+            $salonName,
+            $serviceName,
+            $specialistName,
+            $customerName
+        );
+    }
+    private function getServiceName(int $serviceId): string
+    {
+        if ($serviceId <= 0) return '';
+        if (isset($this->serviceNameCache[$serviceId])) return $this->serviceNameCache[$serviceId];
+
+        $name = $this->salonServicesRepository->getNameById($serviceId);
+        $final = $name !== null && trim($name) !== '' ? $name : "Service #{$serviceId}";
+        $this->serviceNameCache[$serviceId] = $final;
+
+        return $final;
+    }
+
+    private function getUserName(int $userId, string $fallbackPrefix): string
+    {
+        if ($userId <= 0) return '';
+        if (isset($this->userNameCache[$userId])) return $this->userNameCache[$userId];
+
+        $name = $this->usersRepository->getFullNameById($userId);
+        $final = $name !== null && trim($name) !== '' ? $name : "{$fallbackPrefix} #{$userId}";
+        $this->userNameCache[$userId] = $final;
+
+        return $final;
+    }
+    private function getSalonName(int $salonId): string
+    {
+        if ($salonId <= 0) return '';
+        if (isset($this->salonNameCache[$salonId])) return $this->salonNameCache[$salonId];
+
+        $name = $this->salonRepository->getNameById($salonId);
+        $final = $name !== null && trim($name) !== '' ? $name : "Salon #{$salonId}";
+        $this->salonNameCache[$salonId] = $final;
+
+        return $final;
+    }
     public function getAllBySalonId(int $salonId): array
     {
         return $this->appointmentsRepository->getAllBySalonId($salonId);
@@ -245,6 +361,7 @@ class AppointmentsService implements IAppointmentsService
     }
     public function getAllByCustomerId(int $customerId): array
     {
+
         return $this->appointmentsRepository->getAllByCustomerId($customerId);
     }
 

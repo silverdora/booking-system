@@ -8,6 +8,15 @@ use PDO;
 
 class SalonServicesRepository extends Repository implements ISalonServicesRepository
 {
+    public function getNameById(int $id): ?string
+    {
+        $sql = 'SELECT name FROM salonServices WHERE id = :id';
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([':id' => $id]);
+        $name = $stmt->fetchColumn();
+        return $name !== false ? (string)$name : null;
+    }
+
     public function getAllBySalonId(int $salonId): array
     {
         $sql = 'SELECT id, salonId, name, price, durationMinutes

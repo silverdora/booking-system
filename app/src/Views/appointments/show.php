@@ -15,14 +15,16 @@ $isCustomer = $vm->isCustomer;
     <a href="/appointments">&larr; Back to appointments</a>
 </p>
 
-<h1><?= htmlspecialchars("Appointment #{$appointment->id}") ?></h1>
+<h1><?= htmlspecialchars($vm->title) ?></h1>
 
-<p><strong>Start:</strong> <?= htmlspecialchars($appointment->startsAt) ?></p>
-<p><strong>End:</strong> <?= htmlspecialchars($appointment->endsAt) ?></p>
+<p><strong>Salon:</strong> <?= htmlspecialchars($vm->salonName) ?></p>
+<p><strong>Service:</strong> <?= htmlspecialchars($vm->serviceName) ?></p>
+<p><strong>Specialist:</strong> <?= htmlspecialchars($vm->specialistName) ?></p>
+<p><strong>Customer:</strong> <?= htmlspecialchars($vm->customerName) ?></p>
 
-<p><strong>Service ID:</strong> <?= htmlspecialchars((string)$appointment->serviceId) ?></p>
-<p><strong>Specialist ID:</strong> <?= htmlspecialchars((string)$appointment->specialistId) ?></p>
-<p><strong>Customer ID:</strong> <?= htmlspecialchars((string)$appointment->customerId) ?></p>
+<p><strong>Start:</strong> <?= htmlspecialchars($vm->appointment->startsAt) ?></p>
+<p><strong>End:</strong> <?= htmlspecialchars($vm->appointment->endsAt) ?></p>
+
 
 <?php if (!$isCustomer) : ?>
     <p>

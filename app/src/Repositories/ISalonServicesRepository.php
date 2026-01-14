@@ -13,5 +13,7 @@ interface ISalonServicesRepository
     public function update(int $salonId, int $id, SalonServiceModel $service): void;
     public function delete(int $salonId, int $id): void;
     public function getOptionsBySalonId(int $salonId): array;
+    public function getNameById(int $id): ?string;
+
 }
 

@@ -165,17 +165,14 @@ class AppointmentsController
                 echo 'Not logged in.';
                 return;
             }
-
-            $appointments = $this->service->getAllByCustomerId($userId);
-            $vm = \App\ViewModels\AppointmentsViewModel::forCustomer($appointments);
+            $vm = $this->service->buildIndexViewModelForCustomer($userId);
             require __DIR__ . '/../Views/appointments/index.php';
             return;
         }
 
         // staff/owner view: appointments for salon in session
         $salonId = $this->getSalonIdFromSession();
-        $appointments = $this->service->getAllBySalonId($salonId);
-        $vm = \App\ViewModels\AppointmentsViewModel::forSalon($salonId, $appointments);
+        $vm = $this->service->buildIndexViewModelForSalon($salonId);
         require __DIR__ . '/../Views/appointments/index.php';
     }
 
@@ -241,29 +238,22 @@ class AppointmentsController
 
         $id = (int)$id;
         $role = strtolower(trim((string)($_SESSION['user']['role'] ?? '')));
+        $userId = (int)($_SESSION['user']['id'] ?? 0);
         $isCustomer = ($role === 'customer');
 
-        if ($isCustomer) {
-            $customerId = (int)($_SESSION['user']['id'] ?? 0);
-            if ($customerId <= 0) {
-                http_response_code(403);
-                echo 'Not logged in.';
-                return;
-            }
-
-            $appointment = $this->service->getByIdForCustomer($customerId, $id);
+        if ($role === 'customer') {
+            $vm = $this->service->buildDetailViewModelForCustomer($userId, $id);
         } else {
             $salonId = $this->getSalonIdFromSession();
-            $appointment = $this->service->getById($salonId, $id);
+            $vm = $this->service->buildDetailViewModelForSalon($salonId, $id);
         }
 
-        if (!$appointment) {
+        if (!$vm) {
             http_response_code(404);
             echo 'Appointment not found';
             return;
         }
 
-        $vm = new \App\ViewModels\AppointmentDetailViewModel($appointment, $isCustomer);
         require __DIR__ . '/../Views/appointments/show.php';
     }
 

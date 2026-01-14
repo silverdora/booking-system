@@ -8,6 +8,21 @@ use PDO;
 
 class UsersRepository extends Repository implements IUsersRepository
 {
+    public function getFullNameById(int $id): ?string
+    {
+        $sql = 'SELECT firstName, lastName FROM users WHERE id = :id';
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([':id' => $id]);
+
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        if (!$row) {
+            return null;
+        }
+
+        $fullName = trim(((string)($row['firstName'] ?? '')) . ' ' . ((string)($row['lastName'] ?? '')));
+        return $fullName !== '' ? $fullName : null;
+    }
+
     public function specialistCanDoService(int $specialistId, int $serviceId): bool
     {
         $sql = 'SELECT COUNT(*)

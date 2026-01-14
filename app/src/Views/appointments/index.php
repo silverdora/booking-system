@@ -26,32 +26,35 @@ $isCustomer = ($role === 'customer');
         <a href="/appointments/create">Create appointment</a>
     <?php endif; ?>
 </p>
-
-<?php if (!empty($vm->appointments)) : ?>
+<?php if (!empty($vm->items)) : ?>
     <ul>
-        <?php foreach ($vm->appointments as $appointment) : ?>
+        <?php foreach ($vm->items as $item) : ?>
+            <?php $a = $item->appointment; ?>
             <li>
                 <strong>
-                    <a href="/appointments/<?= htmlspecialchars((string)$appointment->id) ?>">
-                        Appointment #<?= htmlspecialchars((string)$appointment->id) ?>
+                    <a href="/appointments/<?= htmlspecialchars((string)$a->id) ?>">
+                        <?= htmlspecialchars($item->serviceName) ?> — #<?= htmlspecialchars((string)$a->id) ?>
                     </a>
                 </strong>
 
                 <div>
-                    Service ID: <?= htmlspecialchars((string)$appointment->serviceId) ?> |
-                    Specialist ID: <?= htmlspecialchars((string)$appointment->specialistId) ?> |
-                    Customer ID: <?= htmlspecialchars((string)$appointment->customerId) ?>
+                    Salon: <?= htmlspecialchars($item->salonName) ?>
                 </div>
 
                 <div>
-                    <?= htmlspecialchars($appointment->startsAt) ?> → <?= htmlspecialchars($appointment->endsAt) ?>
+                    Specialist: <?= htmlspecialchars($item->specialistName) ?> |
+                    Customer: <?= htmlspecialchars($item->customerName) ?>
                 </div>
 
-                <?php if (!$isCustomer) : ?>
-                    <p>
-                        <a href="/appointments/<?= htmlspecialchars((string)$appointment->id) ?>/edit">Edit</a>
+                <div>
+                    <?= htmlspecialchars($a->startsAt) ?> → <?= htmlspecialchars($a->endsAt) ?>
+                </div>
 
-                    <form action="/appointments/<?= htmlspecialchars((string)$appointment->id) ?>/delete"
+                <?php if (!$vm->isCustomer) : ?>
+                    <p>
+                        <a href="/appointments/<?= htmlspecialchars((string)$a->id) ?>/edit">Edit</a>
+
+                    <form action="/appointments/<?= htmlspecialchars((string)$a->id) ?>/delete"
                           method="post" style="display:inline"
                           onsubmit="return confirm('Delete this appointment?');">
                         <button type="submit">Delete</button>
@@ -64,6 +67,7 @@ $isCustomer = ($role === 'customer');
 <?php else : ?>
     <p>No appointments found.</p>
 <?php endif; ?>
+
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>
 

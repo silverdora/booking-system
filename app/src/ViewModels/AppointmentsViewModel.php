@@ -9,11 +9,15 @@ class AppointmentsViewModel
     public string $title;
     public ?int $salonId;
 
-    /** @var AppointmentModel[] */
+
+    /** @var AppointmentsListItemViewModel[] */
     public array $appointments;
 
+
+
+
     /**
-     * @param AppointmentModel[] $appointments
+     * @param AppointmentsListItemViewModel[] $appointments
      */
     public function __construct(?int $salonId, array $appointments, string $title)
     {
