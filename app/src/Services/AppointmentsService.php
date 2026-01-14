@@ -48,7 +48,7 @@ class AppointmentsService implements IAppointmentsService
             return $this->mapListItem($a);
         }, $appointments);
 
-        return new AppointmentsViewModel('My appointments', true, $items);
+        return new AppointmentsViewModel(null,$items, 'My appointments' );
     }
     public function buildIndexViewModelForSalon(int $salonId): AppointmentsViewModel
     {
@@ -61,7 +61,7 @@ class AppointmentsService implements IAppointmentsService
             return $this->mapListItem($a);
         }, $appointments);
 
-        return new AppointmentsViewModel($title, false, $items);
+        return new AppointmentsViewModel($salonId, $items, $title);
     }
     public function buildDetailViewModelForCustomer(int $customerId, int $appointmentId): ?AppointmentDetailViewModel
     {

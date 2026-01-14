@@ -26,9 +26,9 @@ $isCustomer = ($role === 'customer');
         <a href="/appointments/create">Create appointment</a>
     <?php endif; ?>
 </p>
-<?php if (!empty($vm->items)) : ?>
+<?php if (count($vm->appointments)>0) : ?>
     <ul>
-        <?php foreach ($vm->items as $item) : ?>
+        <?php foreach ($vm->appointments as $item) : ?>
             <?php $a = $item->appointment; ?>
             <li>
                 <strong>
@@ -50,7 +50,7 @@ $isCustomer = ($role === 'customer');
                     <?= htmlspecialchars($a->startsAt) ?> → <?= htmlspecialchars($a->endsAt) ?>
                 </div>
 
-                <?php if (!$vm->isCustomer) : ?>
+                <?php if (!$isCustomer) : ?>
                     <p>
                         <a href="/appointments/<?= htmlspecialchars((string)$a->id) ?>/edit">Edit</a>
 
