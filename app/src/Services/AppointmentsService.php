@@ -173,9 +173,45 @@ class AppointmentsService implements IAppointmentsService
         return $this->appointmentsRepository->getById($salonId, $id);
     }
 
+    private function normalizeAndFillTimes(int $salonId, AppointmentModel $appointment): void
+    {
+        $errors = [];
+
+        if (trim((string)$appointment->startsAt) === '') {
+            $errors[] = 'Start time is required.';
+        }
+
+        if ($appointment->serviceId <= 0) {
+            $errors[] = 'Service is required.';
+        }
+
+        if (!empty($errors)) {
+            throw new \InvalidArgumentException(implode("\n", $errors));
+        }
+
+        $startTs = strtotime($appointment->startsAt);
+        if ($startTs === false) {
+            throw new \InvalidArgumentException('Invalid date/time format.');
+        }
+
+        $service = $this->salonServicesRepository->getById($salonId, (int)$appointment->serviceId);
+        if (!$service) {
+            throw new \InvalidArgumentException('Service not found.');
+        }
+        $duration = (int)$service->durationMinutes;
+        if ($duration <= 0) {
+            throw new \InvalidArgumentException('Service duration is required.');
+        }
+
+        $appointment->startsAt = date('Y-m-d H:i:s', $startTs);
+        $appointment->endsAt   = date('Y-m-d H:i:s', $startTs + $duration * 60);
+    }
+
     public function create(int $salonId, AppointmentModel $appointment): void
     {
         $appointment->salonId = $salonId;
+        $this->normalizeAndFillTimes($salonId, $appointment);
+
         $this->validate($appointment);
         if (!$this->usersRepository->specialistCanDoService($appointment->specialistId, $appointment->serviceId)) {
             throw new \InvalidArgumentException('Selected specialist cannot perform this service.');
@@ -191,7 +227,6 @@ class AppointmentsService implements IAppointmentsService
             throw new \InvalidArgumentException('This specialist is not available for the selected time slot.');
         }
 
-
         $this->appointmentsRepository->create($appointment);
     }
 
@@ -200,6 +235,7 @@ class AppointmentsService implements IAppointmentsService
         // enforce relationship in service layer
         $appointment->salonId = $salonId;
         $appointment->id = $id;
+        $this->normalizeAndFillTimes($salonId, $appointment);
         $this->validate($appointment);
         if (!$this->usersRepository->specialistCanDoService($appointment->specialistId, $appointment->serviceId)) {
             throw new \InvalidArgumentException('Selected specialist cannot perform this service.');

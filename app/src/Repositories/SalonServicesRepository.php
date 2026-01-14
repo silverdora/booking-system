@@ -94,7 +94,7 @@ class SalonServicesRepository extends Repository implements ISalonServicesReposi
 
     public function getOptionsBySalonId(int $salonId): array
     {
-        $sql = 'SELECT id, name
+        $sql = 'SELECT id, name, durationMinutes
             FROM salonServices
             WHERE salonId = :salonId
             ORDER BY name';
@@ -108,6 +108,7 @@ class SalonServicesRepository extends Repository implements ISalonServicesReposi
             return [
                 'id' => (int)$row['id'],
                 'name' => (string)$row['name'],
+                'durationMinutes' => (int)$row['durationMinutes']
             ];
         }, $rows);
     }
