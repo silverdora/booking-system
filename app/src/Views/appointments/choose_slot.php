@@ -2,7 +2,9 @@
 
 <p><a href="/salons/<?= (int)$salonId ?>/book/date?serviceId=<?= (int)$serviceId ?>">&larr; Back to date</a></p>
 <h1>Choose a slot</h1>
-<pre><?php var_dump($specialistsWithSlots); ?></pre>
+<?php if (empty($specialistsWithSlots)) : ?>
+    <p>No specialists are assigned to this service yet.</p>
+<?php endif; ?>
 
 <?php foreach ($specialistsWithSlots as $item): ?>
     <h2><?= htmlspecialchars($item['specialist']['name']) ?></h2>

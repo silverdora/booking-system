@@ -18,5 +18,7 @@ interface IUsersRepository
     public function getCustomerOptions(): array;
 
     /** @return array<int, array{id:int, name:string}> */
-    public function getSpecialistOptionsBySalonService(int $salonId, int $salonServiceId): array;
+    public function getSpecialistOptionsByServiceId(int $serviceId): array;
+    public function specialistCanDoService(int $specialistId, int $serviceId): bool;
+
 }

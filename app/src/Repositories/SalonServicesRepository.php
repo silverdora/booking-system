@@ -10,7 +10,7 @@ class SalonServicesRepository extends Repository implements ISalonServicesReposi
 {
     public function getAllBySalonId(int $salonId): array
     {
-        $sql = 'SELECT id, salonId, specialistId, name, price, durationMinutes
+        $sql = 'SELECT id, salonId, name, price, durationMinutes
                 FROM salonServices
                 WHERE salonId = :salonId
                 ORDER BY name';
@@ -23,7 +23,7 @@ class SalonServicesRepository extends Repository implements ISalonServicesReposi
 
     public function getById(int $salonId, int $id): ?SalonServiceModel
     {
-        $sql = 'SELECT id, salonId, specialistId, name, price, durationMinutes
+        $sql = 'SELECT id, salonId, name, price, durationMinutes
                 FROM salonServices
                 WHERE salonId = :salonId AND id = :id';
 
@@ -41,13 +41,12 @@ class SalonServicesRepository extends Repository implements ISalonServicesReposi
 
     public function create(SalonServiceModel $service): void
     {
-        $sql = 'INSERT INTO salonServices (salonId, specialistId, name, price, durationMinutes)
-                VALUES (:salonId, :specialistId, :name, :price, :durationMinutes)';
+        $sql = 'INSERT INTO salonServices (salonId, name, price, durationMinutes)
+                VALUES (:salonId, :name, :price, :durationMinutes)';
 
         $stmt = $this->getConnection()->prepare($sql);
         $stmt->execute([
             ':salonId' => $service->salonId,
-            ':specialistId' => $service->specialistId,
             ':name' => $service->name,
             ':price' => $service->price,
             ':durationMinutes' => $service->durationMinutes,
@@ -60,7 +59,6 @@ class SalonServicesRepository extends Repository implements ISalonServicesReposi
     {
         $sql = 'UPDATE salonServices
                 SET name = :name,
-                    specialistId = :specialistId,
                     price = :price,
                     durationMinutes = :durationMinutes
                 WHERE salonId = :salonId AND id = :id';
@@ -68,7 +66,6 @@ class SalonServicesRepository extends Repository implements ISalonServicesReposi
         $stmt = $this->getConnection()->prepare($sql);
         $stmt->execute([
             ':salonId' => $salonId,
-            ':specialistId' => $service->specialistId,
             ':id' => $id,
             ':name' => $service->name,
             ':price' => $service->price,

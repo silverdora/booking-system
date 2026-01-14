@@ -6,15 +6,25 @@ use App\ViewModels\AppointmentsViewModel;
 $title = $vm->title;
 
 require __DIR__ . '/../partials/header.php';
+
+$role = strtolower(trim((string)($_SESSION['user']['role'] ?? '')));
+$isCustomer = ($role === 'customer');
 ?>
-<p>
-    <a href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>">&larr; Back to salon</a>
-</p>
+
+<?php if (!$isCustomer && $vm->salonId !== null) : ?>
+    <p>
+        <a href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>">&larr; Back to salon</a>
+    </p>
+<?php endif; ?>
 
 <h1><?= htmlspecialchars($vm->title) ?></h1>
 
 <p>
-    <a href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>/appointments/create">Create appointment</a>
+    <?php if ($isCustomer) : ?>
+        <a href="/salons">Book new appointment</a>
+    <?php else : ?>
+        <a href="/appointments/create">Create appointment</a>
+    <?php endif; ?>
 </p>
 
 <?php if (!empty($vm->appointments)) : ?>
@@ -22,7 +32,7 @@ require __DIR__ . '/../partials/header.php';
         <?php foreach ($vm->appointments as $appointment) : ?>
             <li>
                 <strong>
-                    <a href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>/appointments/<?= htmlspecialchars((string)$appointment->id) ?>">
+                    <a href="/appointments/<?= htmlspecialchars((string)$appointment->id) ?>">
                         Appointment #<?= htmlspecialchars((string)$appointment->id) ?>
                     </a>
                 </strong>
@@ -35,20 +45,19 @@ require __DIR__ . '/../partials/header.php';
 
                 <div>
                     <?= htmlspecialchars($appointment->startsAt) ?> → <?= htmlspecialchars($appointment->endsAt) ?>
-
                 </div>
 
+                <?php if (!$isCustomer) : ?>
+                    <p>
+                        <a href="/appointments/<?= htmlspecialchars((string)$appointment->id) ?>/edit">Edit</a>
 
-
-                <p>
-                    <a href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>/appointments/<?= htmlspecialchars((string)$appointment->id) ?>/edit">Edit</a>
-
-                <form action="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>/appointments/<?= htmlspecialchars((string)$appointment->id) ?>/delete"
-                      method="post" style="display:inline"
-                      onsubmit="return confirm('Delete this appointment?');">
-                    <button type="submit">Delete</button>
-                </form>
-                </p>
+                    <form action="/appointments/<?= htmlspecialchars((string)$appointment->id) ?>/delete"
+                          method="post" style="display:inline"
+                          onsubmit="return confirm('Delete this appointment?');">
+                        <button type="submit">Delete</button>
+                    </form>
+                    </p>
+                <?php endif; ?>
             </li>
         <?php endforeach; ?>
     </ul>
@@ -57,4 +66,5 @@ require __DIR__ . '/../partials/header.php';
 <?php endif; ?>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>
+
 

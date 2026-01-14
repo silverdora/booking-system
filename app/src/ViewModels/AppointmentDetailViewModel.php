@@ -7,15 +7,17 @@ use App\Models\AppointmentModel;
 class AppointmentDetailViewModel
 {
     public string $title;
-    public int $salonId;
     public AppointmentModel $appointment;
 
-    public function __construct(int $salonId, AppointmentModel $appointment)
+    public bool $isCustomer;
+
+    public function __construct(AppointmentModel $appointment, bool $isCustomer)
     {
-        $this->salonId = $salonId;
         $this->appointment = $appointment;
+        $this->isCustomer = $isCustomer;
         $this->title = "Appointment #{$appointment->id}";
     }
 }
+
 
 

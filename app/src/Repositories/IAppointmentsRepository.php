@@ -21,9 +21,8 @@ interface IAppointmentsRepository
     ): bool;
     /** @return AppointmentModel[] */
     public function getAppointmentsBySpecialistAndDate(int $salonId, int $specialistId, string $date): array;
-
-
-
+    /** @return AppointmentModel[] */
+    public function getAllByCustomerId(int $customerId): array;
 }
 
 

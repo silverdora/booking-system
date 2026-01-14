@@ -50,6 +50,7 @@ class AppointmentsController
 
         // View: choose date (calendar)
         $title = 'Choose date';
+        $serviceId = $serviceId;
         require __DIR__ . '/../Views/appointments/choose_date.php';
     }
 
@@ -95,19 +96,41 @@ class AppointmentsController
             echo $e->getMessage();
         }
     }
-
     public function availableSlots($specialistId): void
     {
-        $salonId = $this->getSalonId(); // from session or from query
+        $this->requireCustomer();
+
+        $salonId = (int)($_GET['salonId'] ?? 0);
+        $serviceId = (int)($_GET['serviceId'] ?? 0);
+        $date = (string)($_GET['date'] ?? '');
+
+        if ($salonId <= 0 || $serviceId <= 0 || $date === '') {
+            http_response_code(400);
+            echo 'salonId, serviceId and date are required.';
+            return;
+        }
+
         $specialistId = (int)$specialistId;
 
-        $date = isset($_GET['date']) ? (string)$_GET['date'] : null; // YYYY-MM-DD
+        // duration from salonServices
+        $service = $this->service->getServiceById($salonId, $serviceId);
+        if (!$service) {
+            http_response_code(404);
+            echo 'Service not found.';
+            return;
+        }
 
-        $slots = $this->service->getAvailableSlotsBySpecialist($salonId, $specialistId, $date);
+        $slots = $this->service->getAvailableSlotsBySpecialist(
+            $salonId,
+            $specialistId,
+            $date,
+            (int)$service->durationMinutes
+        );
 
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($slots, JSON_UNESCAPED_UNICODE);
     }
+
 
 
     private function getSalonIdFromSession(): int
@@ -131,13 +154,32 @@ class AppointmentsController
 
     public function index(): void
     {
+        Authentication::requireLogin();
+
+        $role = strtolower(trim((string)($_SESSION['user']['role'] ?? '')));
+        $userId = (int)($_SESSION['user']['id'] ?? 0);
+
+        if ($role === 'customer') {
+            if ($userId <= 0) {
+                http_response_code(403);
+                echo 'Not logged in.';
+                return;
+            }
+
+            $appointments = $this->service->getAllByCustomerId($userId);
+            $vm = \App\ViewModels\AppointmentsViewModel::forCustomer($appointments);
+            require __DIR__ . '/../Views/appointments/index.php';
+            return;
+        }
+
+        // staff/owner view: appointments for salon in session
         $salonId = $this->getSalonIdFromSession();
-
         $appointments = $this->service->getAllBySalonId($salonId);
-        $vm = new AppointmentsViewModel($salonId, $appointments);
-
+        $vm = \App\ViewModels\AppointmentsViewModel::forSalon($salonId, $appointments);
         require __DIR__ . '/../Views/appointments/index.php';
     }
+
+
 
     public function create(): void
     {
@@ -195,19 +237,36 @@ class AppointmentsController
     }
     public function show($id): void
     {
-        $salonId = $this->getSalonIdFromSession();
-        $id = (int)$id;
+        Authentication::requireLogin();
 
-        $appointment = $this->service->getById($salonId, $id);
+        $id = (int)$id;
+        $role = strtolower(trim((string)($_SESSION['user']['role'] ?? '')));
+        $isCustomer = ($role === 'customer');
+
+        if ($isCustomer) {
+            $customerId = (int)($_SESSION['user']['id'] ?? 0);
+            if ($customerId <= 0) {
+                http_response_code(403);
+                echo 'Not logged in.';
+                return;
+            }
+
+            $appointment = $this->service->getByIdForCustomer($customerId, $id);
+        } else {
+            $salonId = $this->getSalonIdFromSession();
+            $appointment = $this->service->getById($salonId, $id);
+        }
+
         if (!$appointment) {
             http_response_code(404);
             echo 'Appointment not found';
             return;
         }
 
-        $vm = new AppointmentDetailViewModel($salonId, $appointment);
+        $vm = new \App\ViewModels\AppointmentDetailViewModel($appointment, $isCustomer);
         require __DIR__ . '/../Views/appointments/show.php';
     }
+
 
     public function edit($id): void
     {

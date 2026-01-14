@@ -41,6 +41,10 @@ class AppointmentsService implements IAppointmentsService
     {
         $appointment->salonId = $salonId;
         $this->validate($appointment);
+        if (!$this->usersRepository->specialistCanDoService($appointment->specialistId, $appointment->serviceId)) {
+            throw new \InvalidArgumentException('Selected specialist cannot perform this service.');
+        }
+
         // server-side availability validation
         if (!$this->appointmentsRepository->isSpecialistAvailable(
             $salonId,
@@ -51,6 +55,7 @@ class AppointmentsService implements IAppointmentsService
             throw new \InvalidArgumentException('This specialist is not available for the selected time slot.');
         }
 
+
         $this->appointmentsRepository->create($appointment);
     }
 
@@ -60,6 +65,11 @@ class AppointmentsService implements IAppointmentsService
         $appointment->salonId = $salonId;
         $appointment->id = $id;
         $this->validate($appointment);
+        if (!$this->usersRepository->specialistCanDoService($appointment->specialistId, $appointment->serviceId)) {
+            throw new \InvalidArgumentException('Selected specialist cannot perform this service.');
+        }
+
+
 
         if (!$this->appointmentsRepository->isSpecialistAvailable(
             $salonId,
@@ -70,6 +80,7 @@ class AppointmentsService implements IAppointmentsService
         )) {
             throw new \InvalidArgumentException('This specialist is not available for the selected time slot.');
         }
+
 
         $this->appointmentsRepository->update($salonId, $id, $appointment);
     }
@@ -85,7 +96,7 @@ class AppointmentsService implements IAppointmentsService
 
         if ($appointment->serviceId <= 0) $errors[] = 'Service is required.';
         if ($appointment->specialistId <= 0) $errors[] = 'Specialist is required.';
-        if ($appointment->customerId <= 0) $errors[] = 'Client is required.';
+        if ($appointment->customerId <= 0) $errors[] = 'Customer is required.';
 
         if (trim($appointment->startsAt) === '' || trim($appointment->endsAt) === '') {
             $errors[] = 'Start and end time are required.';
@@ -206,7 +217,8 @@ class AppointmentsService implements IAppointmentsService
             throw new \InvalidArgumentException('Service duration is required.');
         }
 
-        $specialists = $this->usersRepository->getSpecialistOptionsBySalonService($salonId, $serviceId);
+        $specialists = $this->usersRepository->getSpecialistOptionsByServiceId($serviceId);
+
 
         $result = [];
 
@@ -227,7 +239,20 @@ class AppointmentsService implements IAppointmentsService
         return $result;
     }
 
+    public function getServiceById(int $salonId, int $serviceId)
+    {
+        return $this->salonServicesRepository->getById($salonId, $serviceId);
+    }
+    public function getAllByCustomerId(int $customerId): array
+    {
+        return $this->appointmentsRepository->getAllByCustomerId($customerId);
+    }
 
+    public function getByIdForCustomer(int $customerId, int $id): ?AppointmentModel
+    {
+
+        return $this->appointmentsRepository->getByIdForCustomer($customerId, $id);
+    }
 
 }
 

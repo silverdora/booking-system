@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\AppointmentModel;
+use App\Models\SalonServiceModel;
 
 interface IAppointmentsService
 {
@@ -25,6 +26,9 @@ interface IAppointmentsService
         int $durationMinutes
     ): array;
 
-
+    //public function getServiceById(int $salonId, int $serviceId): ?SalonServiceModel;
+    /** @return AppointmentModel[] */
+    public function getAllByCustomerId(int $customerId): array;
+    public function getByIdForCustomer(int $customerId, int $id): ?AppointmentModel;
 }
 

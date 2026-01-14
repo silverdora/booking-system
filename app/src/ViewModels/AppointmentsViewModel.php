@@ -7,7 +7,7 @@ use App\Models\AppointmentModel;
 class AppointmentsViewModel
 {
     public string $title;
-    public int $salonId;
+    public ?int $salonId;
 
     /** @var AppointmentModel[] */
     public array $appointments;
@@ -15,12 +15,23 @@ class AppointmentsViewModel
     /**
      * @param AppointmentModel[] $appointments
      */
-    public function __construct(int $salonId, array $appointments)
+    public function __construct(?int $salonId, array $appointments, string $title)
     {
         $this->salonId = $salonId;
         $this->appointments = $appointments;
-        $this->title = "Appointments (Salon #{$salonId})";
+        $this->title = $title;
+    }
+
+    public static function forSalon(int $salonId, array $appointments): self
+    {
+        return new self($salonId, $appointments, "Appointments (Salon #{$salonId})");
+    }
+
+    public static function forCustomer(array $appointments): self
+    {
+        return new self(null, $appointments, 'My appointments');
     }
 }
+
 
 

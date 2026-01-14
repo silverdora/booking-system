@@ -8,22 +8,32 @@ use PDO;
 
 class UsersRepository extends Repository implements IUsersRepository
 {
-    public function getSpecialistOptionsBySalonService(int $salonId, int $salonServiceId): array
+    public function specialistCanDoService(int $specialistId, int $serviceId): bool
+    {
+        $sql = 'SELECT COUNT(*)
+            FROM specialistSalonServices
+            WHERE serviceId = :serviceId AND specialistId = :specialistId';
+
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([
+            ':serviceId' => $serviceId,
+            ':specialistId' => $specialistId,
+        ]);
+
+        return ((int)$stmt->fetchColumn()) > 0;
+    }
+
+    public function getSpecialistOptionsByServiceId(int $serviceId): array
     {
         $sql = 'SELECT u.id, u.firstName, u.lastName
             FROM specialistSalonServices sss
-            INNER JOIN salonServices ss ON ss.id = sss.salonServiceId
             INNER JOIN users u ON u.id = sss.specialistId
-            WHERE ss.salonId = :salonId
-              AND ss.id = :salonServiceId
+            WHERE sss.serviceId = :serviceId
               AND u.role = "specialist"
             ORDER BY u.lastName, u.firstName';
 
         $stmt = $this->getConnection()->prepare($sql);
-        $stmt->execute([
-            ':salonId' => $salonId,
-            ':salonServiceId' => $salonServiceId,
-        ]);
+        $stmt->execute([':serviceId' => $serviceId]);
 
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 

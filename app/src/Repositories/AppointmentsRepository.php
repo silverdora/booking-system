@@ -8,6 +8,38 @@ use PDO;
 
 class AppointmentsRepository extends Repository implements IAppointmentsRepository
 {
+    public function getByIdForCustomer(int $customerId, int $id): ?AppointmentModel
+    {
+        $sql = 'SELECT id, salonId, serviceId, specialistId, customerId, startsAt, endsAt
+            FROM appointments
+            WHERE customerId = :customerId AND id = :id
+            LIMIT 1';
+
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([
+            ':customerId' => $customerId,
+            ':id' => $id,
+        ]);
+
+        $stmt->setFetchMode(\PDO::FETCH_CLASS, '\App\Models\AppointmentModel');
+        $appointment = $stmt->fetch();
+
+        return $appointment ?: null;
+    }
+
+    public function getAllByCustomerId(int $customerId): array
+    {
+        $sql = 'SELECT id, salonId, serviceId, specialistId, customerId, startsAt, endsAt
+            FROM appointments
+            WHERE customerId = :customerId
+            ORDER BY startsAt';
+
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([':customerId' => $customerId]);
+
+        return $stmt->fetchAll(PDO::FETCH_CLASS, '\App\Models\AppointmentModel');
+    }
+
     public function getAllBySalonId(int $salonId): array
     {
         $sql = 'SELECT
@@ -137,6 +169,7 @@ class AppointmentsRepository extends Repository implements IAppointmentsReposito
 
         return ((int)$stmt->fetchColumn()) === 0;
     }
+
 
 
     public function getAppointmentsBySpecialistAndDate(int $salonId, int $specialistId, string $date): array
