@@ -57,6 +57,14 @@ require __DIR__ . '/../partials/header.php';
                     </form>
                     </p>
                 <?php endif; ?>
+                <?php if ($vm->isCustomer && $vm->canCancel) : ?>
+                    <form action="/appointments/<?= htmlspecialchars((string)$a->id) ?>/cancel"
+                          method="post" style="display:inline"
+                          onsubmit="return confirm('Cancel this appointment?');">
+                        <button type="submit">Cancel</button>
+                    </form>
+                <?php endif; ?>
+
 
             </li>
         <?php endforeach; ?>

@@ -30,5 +30,7 @@ interface IAppointmentsService
     /** @return AppointmentModel[] */
     public function getAllByCustomerId(int $customerId): array;
     public function getByIdForCustomer(int $customerId, int $id): ?AppointmentModel;
+    public function deleteByCustomer(int $customerId, int $appointmentId): void;
+
 }
 

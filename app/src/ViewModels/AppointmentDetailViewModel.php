@@ -16,11 +16,13 @@ class AppointmentDetailViewModel
     public string $specialistName;
     public string $customerName;
     public bool $canManage;
+    public bool $canCancel;
 
     public function __construct(
         AppointmentModel $appointment,
         bool $isCustomer,
         bool $canManage,
+        bool $canCancel,
         string $salonName,
         string $serviceName,
         string $specialistName,
@@ -29,7 +31,7 @@ class AppointmentDetailViewModel
         $this->appointment = $appointment;
         $this->isCustomer = $isCustomer;
         $this->canManage = $canManage;
-
+        $this->canCancel = $canCancel;
         $this->salonName = $salonName;
         $this->serviceName = $serviceName;
         $this->specialistName = $specialistName;

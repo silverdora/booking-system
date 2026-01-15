@@ -14,7 +14,7 @@ class AppointmentsViewModel
     public bool $isCustomer;
     public bool $canCreate;
     public bool $canManage; // edit/delete
-
+    public bool $canCancel;
     public ?string $primaryActionText;
     public ?string $primaryActionUrl;
 
@@ -30,6 +30,7 @@ class AppointmentsViewModel
         bool $isCustomer,
         bool $canCreate,
         bool $canManage,
+        bool $canCancel,
         ?string $primaryActionText,
         ?string $primaryActionUrl,
         bool $showBackToSalonLink
@@ -41,7 +42,7 @@ class AppointmentsViewModel
         $this->isCustomer = $isCustomer;
         $this->canCreate = $canCreate;
         $this->canManage = $canManage;
-
+        $this->canCancel = $canCancel;
         $this->primaryActionText = $primaryActionText;
         $this->primaryActionUrl = $primaryActionUrl;
 

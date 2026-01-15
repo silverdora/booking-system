@@ -21,7 +21,9 @@ $user = Authentication::user();
 <?php if ($user): ?>
     <nav style="margin-bottom: 1rem;">
         <?php if (($user['role'] ?? '') === 'customer'): ?>
+            <a href="/salons">Salons</a>
             <a href="/profile">My profile</a>
+            <a href="/appointments">My appointments</a>
         <?php endif; ?>
 
         <form action="/logout" method="post" style="display:inline">

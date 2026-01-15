@@ -23,6 +23,8 @@ interface IAppointmentsRepository
     public function getAppointmentsBySpecialistAndDate(int $salonId, int $specialistId, string $date): array;
     /** @return AppointmentModel[] */
     public function getAllByCustomerId(int $customerId): array;
+    public function deleteByCustomer(int $customerId, int $id): void;
+
 }
 
 

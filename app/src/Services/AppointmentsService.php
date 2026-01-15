@@ -40,6 +40,17 @@ class AppointmentsService implements IAppointmentsService
         $this->usersRepository = new UsersRepository();
         $this->salonRepository = new SalonRepository();
     }
+    public function deleteByCustomer(int $customerId, int $appointmentId): void
+    {
+        // check that appointment exists and belongs to this customer
+        $appt = $this->appointmentsRepository->getByIdForCustomer($customerId, $appointmentId);
+        if (!$appt) {
+            throw new \InvalidArgumentException('Appointment not found.');
+        }
+
+        $this->appointmentsRepository->deleteByCustomer($customerId, $appointmentId);
+    }
+
     public function buildIndexViewModelForCustomer(int $customerId): AppointmentsViewModel
     {
         $appointments = $this->appointmentsRepository->getAllByCustomerId($customerId);
@@ -50,13 +61,15 @@ class AppointmentsService implements IAppointmentsService
             null,
             $items,
             'My appointments',
-            true,   // isCustomer
-            true,   // canCreate
-            false,  // canManage
+            true,
+            true,
+            false,
             'Book new appointment',
             '/salons',
-            false
+            false,
+            true // canCancel
         );
+
     }
     public function buildIndexViewModelForSalon(int $salonId): AppointmentsViewModel
     {
@@ -74,9 +87,11 @@ class AppointmentsService implements IAppointmentsService
             false,  // isCustomer
             true,   // canCreate (receptionist)
             true,   // canManage (edit/delete)
+            false,
             'Create appointment',
             '/appointments/receptionist/create',
             true
+
         );
     }
 
@@ -85,7 +100,7 @@ class AppointmentsService implements IAppointmentsService
         $appointment = $this->appointmentsRepository->getByIdForCustomer($customerId, $appointmentId);
         if (!$appointment) return null;
 
-        return $this->mapDetailItem($appointment, true, false);
+        return $this->mapDetailItem($appointment, true, false, true);
     }
 
     public function buildDetailViewModelForSalon(int $salonId, int $appointmentId): ?AppointmentDetailViewModel
@@ -93,7 +108,7 @@ class AppointmentsService implements IAppointmentsService
         $appointment = $this->appointmentsRepository->getById($salonId, $appointmentId);
         if (!$appointment) return null;
 
-        return $this->mapDetailItem($appointment, false, true);
+        return $this->mapDetailItem($appointment, false, true, true);
     }
 
     private function mapListItem(AppointmentModel $a): AppointmentsListItemViewModel
@@ -111,7 +126,7 @@ class AppointmentsService implements IAppointmentsService
             $customerName
         );
     }
-    private function mapDetailItem(AppointmentModel $a, bool $isCustomer, bool $canManage): AppointmentDetailViewModel
+    private function mapDetailItem(AppointmentModel $a, bool $isCustomer, bool $canManage, bool $canCancel): AppointmentDetailViewModel
     {
         $salonName = $this->getSalonName((int)$a->salonId);
         $serviceName = $this->getServiceName((int)$a->serviceId);
@@ -122,6 +137,7 @@ class AppointmentsService implements IAppointmentsService
             $a,
             $isCustomer,
             $canManage,
+            $canCancel,
             $salonName,
             $serviceName,
             $specialistName,

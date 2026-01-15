@@ -410,8 +410,6 @@ class AppointmentsController
         }
     }
 
-
-
     public function delete($id): void
     {
         $this->requireReceptionist();
@@ -422,6 +420,25 @@ class AppointmentsController
         $this->service->delete($salonId, $id);
 
         header("Location: /appointments");
+        exit;
+    }
+
+    public function cancelByCustomer($id): void
+    {
+        $this->requireCustomer();
+
+        $id = (int)$id;
+        $customerId = (int)($_SESSION['user']['id'] ?? 0);
+
+        if ($customerId <= 0) {
+            http_response_code(403);
+            echo 'Not logged in.';
+            return;
+        }
+
+        $this->service->deleteByCustomer($customerId, $id);
+
+        header('Location: /appointments');
         exit;
     }
 

@@ -37,6 +37,14 @@ $appointment = $vm->appointment;
     </form>
     </p>
 <?php endif; ?>
+<?php if ($vm->isCustomer && $vm->canCancel) : ?>
+    <form action="/appointments/<?= htmlspecialchars((string)$appointment->id) ?>/cancel"
+          method="post"
+          onsubmit="return confirm('Cancel this appointment?');">
+        <button type="submit">Cancel</button>
+    </form>
+<?php endif; ?>
+
 
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

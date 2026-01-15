@@ -110,6 +110,8 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
 
     // Delete
     $r->addRoute('POST', '/appointments/{id:\d+}/delete', ['App\Controllers\AppointmentsController', 'delete']);
+    $r->addRoute('POST', '/appointments/{id:\d+}/cancel', ['App\Controllers\AppointmentsController', 'cancelByCustomer']);
+
 
 
 });

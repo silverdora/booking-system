@@ -138,6 +138,18 @@ class AppointmentsRepository extends Repository implements IAppointmentsReposito
             ':id' => $id,
         ]);
     }
+    public function deleteByCustomer(int $customerId, int $id): void
+    {
+        $sql = 'DELETE FROM appointments
+            WHERE id = :id AND customerId = :customerId';
+
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([
+            ':id' => $id,
+            ':customerId' => $customerId,
+        ]);
+    }
+
     public function isSpecialistAvailable(
         int $salonId,
         int $specialistId,
