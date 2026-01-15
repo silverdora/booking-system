@@ -3,15 +3,8 @@ use App\ViewModels\SalonServices\SalonServiceDetailViewModel;
 /** @var SalonServiceDetailViewModel $vm */
 $service = $vm->service;
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title><?= htmlspecialchars($vm->title) ?></title>
-    <link rel="stylesheet" href="/assets/css/main.css">
-</head>
-<body>
-<?php require __DIR__ . '/../partials/header.php'; ?>
+
+<?php require __DIR__ . '/../../partials/header.php'; ?>
 <p><a href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>/services">&larr; Back to services</a></p>
 
 <h1><?= htmlspecialchars($service->name) ?></h1>
@@ -23,6 +16,17 @@ $service = $vm->service;
 <?php if ($service->durationMinutes !== null) : ?>
     <p><strong>Duration:</strong> <?= htmlspecialchars((string)$service->durationMinutes) ?> minutes</p>
 <?php endif; ?>
+<?php if (!empty($vm->specialists)) : ?>
+    <p><strong>Specialists:</strong></p>
+    <ul>
+        <?php foreach ($vm->specialists as $s): ?>
+            <li><?= htmlspecialchars($s['name']) ?></li>
+        <?php endforeach; ?>
+    </ul>
+<?php else : ?>
+    <p><strong>Specialists:</strong> none assigned</p>
+<?php endif; ?>
+
 
 <p>
     <a href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>/services/<?= htmlspecialchars((string)$service->id) ?>/edit">Edit</a>
@@ -34,6 +38,5 @@ $service = $vm->service;
     <button type="submit">Delete</button>
 </form>
 
-</body>
-</html>
+<?php require __DIR__ . '/../../partials/footer.php'; ?>
 

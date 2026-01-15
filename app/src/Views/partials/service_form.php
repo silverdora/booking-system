@@ -3,14 +3,7 @@ use App\ViewModels\SalonServiceFormViewModel;
 /** @var SalonServiceFormViewModel $vm */
 $service = $vm->service;
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title><?= htmlspecialchars($vm->title) ?></title>
-    <link rel="stylesheet" href="/assets/css/main.css">
-</head>
-<body>
+
 
 <p><a href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>/services">&larr; Back to services</a></p>
 
@@ -28,9 +21,29 @@ $service = $vm->service;
     <input id="durationMinutes" name="durationMinutes" type="number" min="0"
            value="<?= htmlspecialchars($service->durationMinutes !== null ? (string)$service->durationMinutes : '') ?>">
 
+    <label>Specialists*</label>
+
+    <?php if (!empty($vm->specialistOptions)): ?>
+        <ul style="list-style:none; padding-left:0;">
+            <?php foreach ($vm->specialistOptions as $opt): ?>
+                <?php $sid = (int)$opt['id']; ?>
+                <li>
+                    <label>
+                        <input type="checkbox"
+                               name="specialistIds[]"
+                               value="<?= htmlspecialchars((string)$sid) ?>"
+                                <?= $vm->isSelectedSpecialist($sid) ? 'checked' : '' ?>>
+                        <?= htmlspecialchars($opt['name']) ?>
+                    </label>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    <?php else: ?>
+        <p>No specialists available for this salon.</p>
+    <?php endif; ?>
+
     <button type="submit"><?= $vm->isEdit ? 'Save changes' : 'Create service' ?></button>
 </form>
 
-</body>
-</html>
+
 

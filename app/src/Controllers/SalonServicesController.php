@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Enums\UserRole;
+use App\Framework\Authentication;
 use App\Models\SalonServiceModel;
 use App\Services\ISalonServicesService;
 use App\Services\SalonServicesService;
@@ -28,17 +30,28 @@ class SalonServicesController
 
     public function create($salonId): void
     {
+        Authentication::requireRole([strtolower(UserRole::Owner->value)]);
         $salonId = (int)$salonId;
         $service = new SalonServiceModel(['salonId' => $salonId]);
-        $vm = new SalonServicesFormViewModel($salonId, $service, false);
+
+        $specialistOptions = $this->service->getSpecialistOptions($salonId);
+        $selectedSpecialistIds = [];
+
+        $vm = new SalonServicesFormViewModel($salonId, $service, false, $specialistOptions, $selectedSpecialistIds);
         require __DIR__ . '/../Views/salons/services/create.php';
     }
+
     public function store($salonId): void
     {
+        Authentication::requireRole([strtolower(UserRole::Owner->value)]);
         $salonId = (int)$salonId;
+
         try {
             $service = new SalonServiceModel($_POST);
-            $this->service->create($salonId, $service);
+            $specialistIds = $_POST['specialistIds'] ?? [];
+
+            $this->service->create($salonId, $service, $specialistIds);
+
             header("Location: /salons/{$salonId}/services");
             exit;
         } catch (\InvalidArgumentException $e) {
@@ -50,40 +63,56 @@ class SalonServicesController
 
     public function show($salonId, $id): void
     {
+
         $salonId = (int)$salonId;
         $id = (int)$id;
+
         $service = $this->service->getById($salonId, $id);
         if (!$service) {
             http_response_code(404);
             echo 'Service not found';
             return;
         }
-        $vm = new SalonServiceDetailViewModel($salonId, $service);
+
+        $specialists = $this->service->getSpecialistsForService($id);
+
+        $vm = new SalonServiceDetailViewModel($salonId, $service, $specialists);
         require __DIR__ . '/../Views/salons/services/show.php';
     }
 
+
     public function edit($salonId, $id): void
     {
+        Authentication::requireRole([strtolower(UserRole::Owner->value)]);
         $salonId = (int)$salonId;
         $id = (int)$id;
+
         $service = $this->service->getById($salonId, $id);
         if (!$service) {
             http_response_code(404);
             echo 'Service not found';
             return;
         }
-        $vm = new SalonServicesFormViewModel($salonId, $service, true);
+
+        $specialistOptions = $this->service->getSpecialistOptions($salonId);
+        $selectedSpecialistIds = $this->service->getAssignedSpecialistIds($id);
+
+        $vm = new SalonServicesFormViewModel($salonId, $service, true, $specialistOptions, $selectedSpecialistIds);
         require __DIR__ . '/../Views/salons/services/edit.php';
     }
 
+
     public function update($salonId, $id): void
     {
+        Authentication::requireRole([strtolower(UserRole::Owner->value)]);
         $salonId = (int)$salonId;
         $id = (int)$id;
 
         try {
             $service = new SalonServiceModel($_POST);
-            $this->service->update($salonId, $id, $service);
+            $specialistIds = $_POST['specialistIds'] ?? [];
+
+            $this->service->update($salonId, $id, $service, $specialistIds);
 
             header("Location: /salons/{$salonId}/services/{$id}");
             exit;
@@ -93,8 +122,10 @@ class SalonServicesController
         }
     }
 
+
     public function delete($salonId, $id): void
     {
+        Authentication::requireRole([strtolower(UserRole::Owner->value)]);
         $salonId = (int)$salonId;
         $id = (int)$id;
 

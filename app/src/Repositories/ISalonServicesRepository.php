@@ -14,6 +14,16 @@ interface ISalonServicesRepository
     public function delete(int $salonId, int $id): void;
     public function getOptionsBySalonId(int $salonId): array;
     public function getNameById(int $id): ?string;
+    /** @return int[] */
+    public function getAssignedSpecialistIds(int $serviceId): array;
+
+    public function setAssignedSpecialists(int $serviceId, array $specialistIds): void;
+
+    /** @return array<int, array{id:int,name:string}> */
+    public function getSpecialistsForService(int $serviceId): array;
+    public function createWithSpecialists(SalonServiceModel $service, array $specialistIds): void;
+
+    public function updateWithSpecialists(int $salonId, int $id, SalonServiceModel $service, array $specialistIds): void;
 
 }
 
