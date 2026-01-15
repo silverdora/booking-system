@@ -8,6 +8,30 @@ use PDO;
 
 class AppointmentsRepository extends Repository implements IAppointmentsRepository
 {
+    public function getAllBySalonIdAndSpecialistId(int $salonId, int $specialistId): array
+    {
+        $sql = 'SELECT
+                id,
+                salonId AS salonId,
+                serviceId AS serviceId,
+                specialistId AS specialistId,
+                customerId AS customerId,
+                startsAt AS startsAt,
+                endsAt AS endsAt
+            FROM appointments
+            WHERE salonId = :salonId
+              AND specialistId = :specialistId
+            ORDER BY startsAt';
+
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([
+            ':salonId' => $salonId,
+            ':specialistId' => $specialistId,
+        ]);
+
+        return $stmt->fetchAll(\PDO::FETCH_CLASS, '\App\Models\AppointmentModel');
+    }
+
     public function getByIdForCustomer(int $customerId, int $id): ?AppointmentModel
     {
         $sql = 'SELECT id, salonId, serviceId, specialistId, customerId, startsAt, endsAt

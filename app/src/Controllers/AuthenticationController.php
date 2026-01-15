@@ -37,8 +37,7 @@ class AuthenticationController
             if ($user['role'] === strtolower(UserRole::Customer->value)) {
                 header('Location: /salons');
             } else {
-                // owner goes to salons (or dashboard)
-                header('Location: /salons');
+                header('Location: /appointments');
             }
             exit;
 

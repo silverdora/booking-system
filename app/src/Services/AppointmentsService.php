@@ -40,6 +40,80 @@ class AppointmentsService implements IAppointmentsService
         $this->usersRepository = new UsersRepository();
         $this->salonRepository = new SalonRepository();
     }
+    public function buildIndexViewModelForSpecialist(int $salonId, int $specialistId, string $viewMode = 'week', string $baseDate = ''): AppointmentsViewModel
+    {
+        $base = $this->parseBaseDate($baseDate);
+        [$rangeStart, $rangeEnd, $days] = $this->getRangeAndDays($viewMode, $base);
+
+        $appointments = $this->appointmentsRepository->getAllBySalonIdAndSpecialistId($salonId, $specialistId);
+
+        $filtered = array_values(array_filter($appointments, function($a) use ($rangeStart, $rangeEnd) {
+            $ts = strtotime((string)$a->startsAt);
+            if ($ts === false) return false;
+            return $ts >= $rangeStart->getTimestamp() && $ts <= $rangeEnd->getTimestamp();
+        }));
+
+        $items = array_map(fn(\App\Models\AppointmentModel $a) => $this->mapListItem($a), $filtered);
+
+        // schedule grid
+        $schedule = [];
+        foreach ($days as $day) {
+            $schedule[$day] = [];
+
+            $t = new \DateTimeImmutable($day . ' ' . self::WORK_START);
+            $end = new \DateTimeImmutable($day . ' ' . self::WORK_END);
+            $step = new \DateInterval('PT' . self::SLOT_MINUTES . 'M');
+
+            while ($t < $end) {
+                $schedule[$day][$t->format('H:i')] = [];
+                $t = $t->add($step);
+            }
+        }
+
+        $times = [];
+        if (!empty($days) && isset($schedule[$days[0]]) && is_array($schedule[$days[0]])) {
+            $times = array_keys($schedule[$days[0]]);
+        }
+
+        foreach ($items as $it) {
+            $startTs = strtotime((string)$it->appointment->startsAt);
+            if ($startTs === false) continue;
+
+            $day = date('Y-m-d', $startTs);
+            $hm  = date('H:i', $startTs);
+
+            if (isset($schedule[$day][$hm])) {
+                $schedule[$day][$hm][] = $it;
+            }
+        }
+
+        $specialistName = $this->getUserName($specialistId, 'Specialist');
+        $title = "My appointments — {$specialistName}";
+
+        // specialist не должен видеть owner ссылки
+        $ownerLinks = [];
+
+        return new AppointmentsViewModel(
+            $salonId,
+            $items,
+            $title,
+            false,  // isCustomer
+            false,  // canCreate
+            false,  // canManage
+            false,  // canCancel
+            null,
+            null,
+            true,
+
+            $viewMode,
+            $base->format('Y-m-d'),
+            $days,
+            $schedule,
+            $ownerLinks,
+            $times
+        );
+    }
+
     public function deleteByCustomer(int $customerId, int $appointmentId): void
     {
         // check that appointment exists and belongs to this customer
@@ -71,29 +145,127 @@ class AppointmentsService implements IAppointmentsService
         );
 
     }
-    public function buildIndexViewModelForSalon(int $salonId): AppointmentsViewModel
+    private function parseBaseDate(string $baseDate): \DateTimeImmutable
     {
+        if ($baseDate === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $baseDate)) {
+            return new \DateTimeImmutable('today');
+        }
+        $dt = \DateTimeImmutable::createFromFormat('Y-m-d', $baseDate);
+        return $dt ?: new \DateTimeImmutable('today');
+    }
+
+    /** @return array{\DateTimeImmutable,\DateTimeImmutable,string[]} [start,end,days] */
+    private function getRangeAndDays(string $viewMode, \DateTimeImmutable $base): array
+    {
+        $viewMode = strtolower($viewMode);
+        if ($viewMode !== 'day' && $viewMode !== 'week') {
+            $viewMode = 'week';
+        }
+
+        if ($viewMode === 'day') {
+            $start = $base->setTime(0, 0, 0);
+            $end   = $base->setTime(23, 59, 59);
+            return [$start, $end, [$base->format('Y-m-d')]];
+        }
+
+        // week Monday..Sunday
+        $monday = $base->modify('monday this week')->setTime(0, 0, 0);
+        $sunday = $monday->modify('+6 days')->setTime(23, 59, 59);
+
+        $days = [];
+        for ($d = $monday; $d <= $sunday; $d = $d->modify('+1 day')) {
+            $days[] = $d->format('Y-m-d');
+        }
+
+        return [$monday, $sunday, $days];
+    }
+
+    public function buildIndexViewModelForSalon(int $salonId, string $viewMode = 'week', string $baseDate = ''): AppointmentsViewModel
+    {
+        $base = $this->parseBaseDate($baseDate);
+        [$rangeStart, $rangeEnd, $days] = $this->getRangeAndDays($viewMode, $base);
+
+
         $appointments = $this->appointmentsRepository->getAllBySalonId($salonId);
 
+
+        $filtered = array_values(array_filter($appointments, function($a) use ($rangeStart, $rangeEnd) {
+            $ts = strtotime((string)$a->startsAt);
+            if ($ts === false) return false;
+            return $ts >= $rangeStart->getTimestamp() && $ts <= $rangeEnd->getTimestamp();
+        }));
+
+
+        $items = array_map(fn(\App\Models\AppointmentModel $a) => $this->mapListItem($a), $filtered);
+
+        // Build schedule grid: schedule[day][time] = items starting at that time
+        $schedule = [];
+
+        if (!empty($days) && isset($schedule[$days[0]]) && is_array($schedule[$days[0]])) {
+            $times = array_keys($schedule[$days[0]]);
+        }
+
+        foreach ($days as $day) {
+            $schedule[$day] = [];
+
+            $t = new \DateTimeImmutable($day . ' ' . self::WORK_START);
+            $end = new \DateTimeImmutable($day . ' ' . self::WORK_END);
+            $step = new \DateInterval('PT' . self::SLOT_MINUTES . 'M');
+
+            while ($t < $end) {
+                $schedule[$day][$t->format('H:i')] = [];
+                $t = $t->add($step);
+            }
+        }
+
+        $times = [];
+        if (!empty($days) && isset($schedule[$days[0]]) && is_array($schedule[$days[0]])) {
+            $times = array_keys($schedule[$days[0]]);
+        }
+        foreach ($items as $it) {
+            $startTs = strtotime((string)$it->appointment->startsAt);
+            if ($startTs === false) continue;
+
+            $day = date('Y-m-d', $startTs);
+            $hm = date('H:i', $startTs);
+
+            if (isset($schedule[$day][$hm])) {
+                $schedule[$day][$hm][] = $it;
+            }
+        }
+
+        // Title
         $salonName = $this->getSalonName($salonId);
         $title = $salonName !== '' ? "Appointments — {$salonName}" : "Appointments (Salon #{$salonId})";
 
-        $items = array_map(fn(AppointmentModel $a) => $this->mapListItem($a), $appointments);
+        // Owner links on same page
+        $ownerLinks = [
+            'staff' => "/salons/{$salonId}/staff",
+            'services' => "/salons/{$salonId}/services",
+            'editSalon' => "/salons/{$salonId}/edit",
+        ];
 
         return new AppointmentsViewModel(
             $salonId,
             $items,
             $title,
             false,  // isCustomer
-            true,   // canCreate (receptionist)
-            true,   // canManage (edit/delete)
-            false,
+            true,   // canCreate
+            true,   // canManage
+            false,  // canCancel
             'Create appointment',
             '/appointments/receptionist/create',
-            true
+            true,   // showBackToSalonLink
 
+            $viewMode,
+            $base->format('Y-m-d'),
+            $days,
+            $schedule,
+            $ownerLinks,
+            $times
         );
     }
+
 
     public function buildDetailViewModelForCustomer(int $customerId, int $appointmentId): ?AppointmentDetailViewModel
     {

@@ -1,14 +1,7 @@
 <?php
 /** @var \App\Models\SalonModel $salon */
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Edit salon</title>
-    <link rel="stylesheet" href="/assets/css/main.css">
-</head>
-<body>
+
 <?php require __DIR__ . '/../partials/header.php'; ?>
 <p><a href="/salons/<?= htmlspecialchars((string)$salon->id) ?>">&larr; Back to salon</a></p>
 <h1>Edit salon</h1>

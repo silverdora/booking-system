@@ -5,7 +5,7 @@ require __DIR__ . '/../../partials/header.php';
 
 <p><a href="/salons/<?= htmlspecialchars((string)$salonId) ?>">&larr; Back to salon</a></p>
 
-<h1>Staff for salon #<?= htmlspecialchars((string)$salonId) ?></h1>
+<h1>Staff</h1>
 
 <p>
     <a href="/users/specialists/create">Add specialist</a> |

@@ -249,11 +249,44 @@ class AppointmentsController
             return;
         }
 
-        // staff/owner view: appointments for salon in session
         $salonId = $this->getSalonIdFromSession();
-        $vm = $this->service->buildIndexViewModelForSalon($salonId);
+
+        $view = strtolower((string)($_GET['view'] ?? 'week'));
+        if (!in_array($view, ['day', 'week'], true)) {
+            $view = 'week';
+        }
+
+        $date = (string)($_GET['date'] ?? date('Y-m-d'));
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            $date = date('Y-m-d');
+        }
+
+        // specialist appointments
+        if ($role === strtolower(\App\Enums\UserRole::Specialist->value)) {
+            $vm = $this->service->buildIndexViewModelForSpecialist($salonId, $userId, $view, $date);
+
+
+            $vm->ownerLinks = [];
+            $vm->canCreate = false;
+            $vm->primaryActionUrl = null;
+            $vm->primaryActionText = null;
+            $vm->canManage = false;
+
+            require __DIR__ . '/../Views/appointments/index.php';
+            return;
+        }
+
+        // owner/receptionist:
+        $vm = $this->service->buildIndexViewModelForSalon($salonId, $view, $date);
+
+        // owner links
+        if ($role !== strtolower(\App\Enums\UserRole::Owner->value)) {
+            $vm->ownerLinks = [];
+        }
+
         require __DIR__ . '/../Views/appointments/index.php';
     }
+
 
     public function create(): void
     {
@@ -320,15 +353,47 @@ class AppointmentsController
         $id = (int)$id;
         $role = strtolower(trim((string)($_SESSION['user']['role'] ?? '')));
         $userId = (int)($_SESSION['user']['id'] ?? 0);
-        $isCustomer = ($role === strtolower(UserRole::Customer->value));
 
+        // customer
         if ($role === strtolower(UserRole::Customer->value)) {
             $vm = $this->service->buildDetailViewModelForCustomer($userId, $id);
-        } else {
-            $salonId = $this->getSalonIdFromSession();
-            $vm = $this->service->buildDetailViewModelForSalon($salonId, $id);
+            if (!$vm) {
+                http_response_code(404);
+                echo 'Appointment not found';
+                return;
+            }
+            require __DIR__ . '/../Views/appointments/show.php';
+            return;
         }
 
+        // staff/owner: salon from session
+        $salonId = $this->getSalonIdFromSession();
+
+        // specialist:
+        if ($role === strtolower(UserRole::Specialist->value)) {
+            $appt = $this->service->getById($salonId, $id);
+            if (!$appt || (int)$appt->specialistId !== $userId) {
+                http_response_code(404);
+                echo 'Appointment not found';
+                return;
+            }
+
+            $vm = $this->service->buildDetailViewModelForSalon($salonId, $id);
+            if (!$vm) {
+                http_response_code(404);
+                echo 'Appointment not found';
+                return;
+            }
+
+            $vm->canManage = false;
+            $vm->canCancel = false;
+
+            require __DIR__ . '/../Views/appointments/show.php';
+            return;
+        }
+
+        // owner/receptionist
+        $vm = $this->service->buildDetailViewModelForSalon($salonId, $id);
         if (!$vm) {
             http_response_code(404);
             echo 'Appointment not found';
@@ -337,6 +402,7 @@ class AppointmentsController
 
         require __DIR__ . '/../Views/appointments/show.php';
     }
+
 
 
     public function edit($id): void

@@ -24,6 +24,8 @@ interface IAppointmentsRepository
     /** @return AppointmentModel[] */
     public function getAllByCustomerId(int $customerId): array;
     public function deleteByCustomer(int $customerId, int $id): void;
+    /** @return AppointmentModel[] */
+    public function getAllBySalonIdAndSpecialistId(int $salonId, int $specialistId): array;
 
 }
 

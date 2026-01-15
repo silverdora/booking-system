@@ -2,14 +2,7 @@
 use App\ViewModels\SalonServices\SalonServicesViewModel;
 /** @var SalonServicesViewModel $vm */
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title><?= htmlspecialchars($vm->title) ?></title>
-    <link rel="stylesheet" href="/assets/css/main.css">
-</head>
-<body>
+
 <?php require __DIR__ . '/../../partials/header.php'; ?>
 <p><a href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>">&larr; Back to salon</a></p>
 

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\AppointmentModel;
 use App\Models\SalonServiceModel;
+use App\ViewModels\AppointmentsViewModel;
 
 interface IAppointmentsService
 {
@@ -31,6 +32,7 @@ interface IAppointmentsService
     public function getAllByCustomerId(int $customerId): array;
     public function getByIdForCustomer(int $customerId, int $id): ?AppointmentModel;
     public function deleteByCustomer(int $customerId, int $appointmentId): void;
+    public function buildIndexViewModelForSalon(int $salonId, string $view = 'week', string $date = ''): AppointmentsViewModel;
 
 }
 

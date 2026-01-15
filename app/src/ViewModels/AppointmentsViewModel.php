@@ -10,7 +10,7 @@ class AppointmentsViewModel
     /** @var AppointmentsListItemViewModel[] */
     public array $appointments;
 
-    //UI/permissions
+    // UI/permissions
     public bool $isCustomer;
     public bool $canCreate;
     public bool $canManage; // edit/delete
@@ -19,6 +19,27 @@ class AppointmentsViewModel
     public ?string $primaryActionUrl;
 
     public bool $showBackToSalonLink;
+
+
+    public string $viewMode; // day|week
+    public string $baseDate; // YYYY-MM-DD
+    /** @var string[] */
+    public array $days; // list of YYYY-MM-DD
+
+    /**
+     * schedule[day][time] = AppointmentsListItemViewModel[]
+     * @var array<string, array<string, array>>
+     */
+    public array $schedule;
+
+    /**
+     * links: staff/services/editSalon
+     * @var array<string,string>
+     */
+    public array $ownerLinks;
+    /** @var string[] */
+    public array $times;
+
 
     /**
      * @param AppointmentsListItemViewModel[] $appointments
@@ -33,7 +54,15 @@ class AppointmentsViewModel
         bool $canCancel,
         ?string $primaryActionText,
         ?string $primaryActionUrl,
-        bool $showBackToSalonLink
+        bool $showBackToSalonLink,
+
+        string $viewMode = 'week',
+        string $baseDate = '',
+        array $days = [],
+        array $schedule = [],
+        array $ownerLinks = [],
+        array $times = []
+
     ) {
         $this->salonId = $salonId;
         $this->appointments = $appointments;
@@ -47,8 +76,18 @@ class AppointmentsViewModel
         $this->primaryActionUrl = $primaryActionUrl;
 
         $this->showBackToSalonLink = $showBackToSalonLink;
+
+
+        $this->viewMode = $viewMode;
+        $this->baseDate = $baseDate !== '' ? $baseDate : date('Y-m-d');
+        $this->days = $days;
+        $this->schedule = $schedule;
+        $this->ownerLinks = $ownerLinks;
+        $this->times = $times;
+
     }
 }
+
 
 
 
