@@ -19,11 +19,67 @@ class UsersController
     {
         $this->usersService = new UsersService();
     }
+    public function staffIndex($salonId): void
+    {
+        $salonId = (int)$salonId;
+
+        $auth = $this->requireUsersManagementAccess(strtolower(\App\Enums\UserRole::Specialist->value));
+
+        if (($auth['role'] ?? '') === strtolower(\App\Enums\UserRole::Owner->value)) {
+            if ((int)$auth['salonId'] !== $salonId) {
+                http_response_code(404);
+                echo 'Not found';
+                return;
+            }
+        }
+
+        $specialists = $this->usersService->getAllByRoleAndSalonId(
+            strtolower(\App\Enums\UserRole::Specialist->value),
+            $salonId
+        );
+
+        $receptionists = $this->usersService->getAllByRoleAndSalonId(
+            strtolower(\App\Enums\UserRole::Receptionist->value),
+            $salonId
+        );
+
+        require __DIR__ . '/../Views/salons/staff/index.php';
+    }
+
+    private function requireUsersManagementAccess(string $role): array
+    {
+        Authentication::requireLogin();
+        $auth = Authentication::user();
+
+        $authRole = $auth['role'] ?? '';
+
+        // owner can manage only specialist/receptionist in own salon
+        if ($authRole === strtolower(UserRole::Owner->value)) {
+            if (!in_array($role, [strtolower(UserRole::Specialist->value), strtolower(UserRole::Receptionist->value)], true)) {
+                http_response_code(403);
+                echo 'Forbidden';
+                exit;
+            }
+
+            if (empty($auth['salonId'])) {
+                http_response_code(403);
+                echo 'Forbidden';
+                exit;
+            }
+
+            return $auth;
+        }
+
+        http_response_code(403);
+        echo 'Forbidden';
+        exit;
+    }
+
 
     public function profileShow(): void
     {
         Authentication::requireRole([strtolower(UserRole::Customer->value)]);
-        $auth = $this->requireCustomer();
+        $auth = Authentication::user();
         $id = (int)$auth['id'];
 
         $user = $this->usersService->getById($id);
@@ -41,7 +97,7 @@ class UsersController
     public function profileEdit(): void
     {
         Authentication::requireRole([strtolower(UserRole::Customer->value)]);
-        $auth = $this->requireCustomer();
+        $auth = Authentication::user();
         $id = (int)$auth['id'];
 
         $user = $this->usersService->getById($id);
@@ -60,7 +116,7 @@ class UsersController
     {
         Authentication::requireRole([strtolower(UserRole::Customer->value)]);
         try {
-            $auth = $this->requireCustomer();
+            $auth = Authentication::user();
             $id = (int)$auth['id'];
 
             $this->usersService->updateCustomerProfile($id, $_POST);
@@ -95,11 +151,16 @@ class UsersController
     }
     public function index($role): void
     {
-        Authentication::requireRole([strtolower(UserRole::Owner->value)]);
         try {
             $role = $this->usersService->normalizeRole((string)$role);
+            $auth = $this->requireUsersManagementAccess($role);
 
-            $users = $this->usersService->getAllByRole($role);
+            if (($auth['role'] ?? '') === strtolower(UserRole::Owner->value)) {
+                $users = $this->usersService->getAllByRoleAndSalonId($role, (int)$auth['salonId']);
+            } else {
+                $users = $this->usersService->getAllByRole($role);
+            }
+
             $vm = new UsersViewModel($users, $role);
 
             require __DIR__ . '/../Views/users/index.php';
@@ -111,14 +172,21 @@ class UsersController
 
     public function create($role): void
     {
-        Authentication::requireRole([strtolower(UserRole::Owner->value)]);
-
         try {
             $role = $this->usersService->normalizeRole((string)$role);
+            $auth = $this->requireUsersManagementAccess($role);
+
+            $isOwner = (($auth['role'] ?? '') === strtolower(UserRole::Owner->value));
 
             $user = new UserModel(['role' => $role]);
+
+            if ($isOwner) {
+                $user->salonId = (int)$auth['salonId'];
+            }
+
             $isEdit = false;
-            $vm = new UserFormViewModel($user, $role, $isEdit);
+            $vm = new UserFormViewModel($user, $role, $isEdit, null, $isOwner);
+
             require __DIR__ . '/../Views/users/create.php';
         } catch (\InvalidArgumentException $e) {
             http_response_code(404);
@@ -126,13 +194,19 @@ class UsersController
         }
     }
 
+
     public function store($role): void
     {
         try {
             $role = $this->usersService->normalizeRole((string)$role);
+            $auth = $this->requireUsersManagementAccess($role);
 
             $user = new UserModel($_POST);
             $user->role = $role;
+
+            if (($auth['role'] ?? '') === strtolower(UserRole::Owner->value)) {
+                $user->salonId = (int)$auth['salonId'];
+            }
 
             $this->usersService->create($user);
 
@@ -144,14 +218,24 @@ class UsersController
         }
     }
 
+
     public function show($role, $id): void
     {
-        Authentication::requireRole([strtolower(UserRole::Owner->value)]);
+
         try {
             $role = $this->usersService->normalizeRole((string)$role);
             $id = (int)$id;
 
             $user = $this->usersService->getById($id);
+            $auth = $this->requireUsersManagementAccess($role);
+
+            if (($auth['role'] ?? '') === strtolower(UserRole::Owner->value)) {
+                if (!$user || (int)$user->salonId !== (int)$auth['salonId']) {
+                    http_response_code(404);
+                    echo 'Not found';
+                    return;
+                }
+            }
 
             // Business check: user must exist and match URL role
             if (!$user || $user->role !== $role) {
@@ -170,10 +254,12 @@ class UsersController
 
     public function edit($role, $id): void
     {
-        Authentication::requireRole([strtolower(UserRole::Owner->value)]);
         try {
             $role = $this->usersService->normalizeRole((string)$role);
             $id = (int)$id;
+
+            $auth = $this->requireUsersManagementAccess($role);
+            $isOwner = (($auth['role'] ?? '') === strtolower(UserRole::Owner->value));
 
             $user = $this->usersService->getById($id);
             if (!$user || $user->role !== $role) {
@@ -182,7 +268,14 @@ class UsersController
                 return;
             }
 
-            $vm = new UserFormViewModel($user, $role, true);
+            // owner: only own salon staff
+            if ($isOwner && (int)$user->salonId !== (int)$auth['salonId']) {
+                http_response_code(404);
+                echo 'Not found';
+                return;
+            }
+
+            $vm = new UserFormViewModel($user, $role, true, null, $isOwner);
 
             require __DIR__ . '/../Views/users/edit.php';
         } catch (\InvalidArgumentException $e) {
@@ -191,15 +284,38 @@ class UsersController
         }
     }
 
+
     public function update($role, $id): void
     {
-        Authentication::requireRole([strtolower(UserRole::Owner->value)]);
         try {
             $role = $this->usersService->normalizeRole((string)$role);
             $id = (int)$id;
 
+            $auth = $this->requireUsersManagementAccess($role);
+
+            $current = $this->usersService->getById($id);
+            if (!$current || $current->role !== $role) {
+                http_response_code(404);
+                echo 'Not found';
+                return;
+            }
+
+            // owner: only own salon staff
+            if (($auth['role'] ?? '') === strtolower(UserRole::Owner->value)) {
+                if ((int)$current->salonId !== (int)$auth['salonId']) {
+                    http_response_code(404);
+                    echo 'Not found';
+                    return;
+                }
+            }
+
             $user = new UserModel($_POST);
             $user->role = $role;
+
+            // owner: force salonId from session
+            if (($auth['role'] ?? '') === strtolower(UserRole::Owner->value)) {
+                $user->salonId = (int)$auth['salonId'];
+            }
 
             $this->usersService->update($id, $user);
 
@@ -211,14 +327,25 @@ class UsersController
         }
     }
 
+
     public function delete($role, $id): void
     {
-        Authentication::requireRole([strtolower(UserRole::Owner->value)]);
+
         try {
             $role = $this->usersService->normalizeRole((string)$role);
             $id = (int)$id;
 
             $user = $this->usersService->getById($id);
+            $auth = $this->requireUsersManagementAccess($role);
+
+            if (($auth['role'] ?? '') === strtolower(UserRole::Owner->value)) {
+                if (!$user || (int)$user->salonId !== (int)$auth['salonId']) {
+                    http_response_code(404);
+                    echo 'Not found';
+                    return;
+                }
+            }
+
             if (!$user || $user->role !== $role) {
                 http_response_code(404);
                 echo 'Not found';

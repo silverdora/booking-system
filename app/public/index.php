@@ -79,6 +79,21 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET',  '/profile/edit', ['App\Controllers\UsersController', 'profileEdit']);
     $r->addRoute('POST', '/profile/edit', ['App\Controllers\UsersController', 'profileUpdate']);
 
+    // Salon owner: Staff management
+    // Salon staff (owner feature)
+    $r->addRoute('GET', '/salons/{salonId:\d+}/staff', ['App\Controllers\UsersController', 'staffIndex']);
+
+    $r->addRoute('GET',  '/salons/{salonId:\d+}/staff/create',       ['App\Controllers\UsersController', 'create']);
+    $r->addRoute('POST', '/salons/{salonId:\d+}/staff/create',       ['App\Controllers\UsersController', 'store']);
+
+    $r->addRoute('GET',  '/salons/{salonId:\d+}/staff/{id:\d+}',     ['App\Controllers\UsersController', 'show']);
+
+    $r->addRoute('GET',  '/salons/{salonId:\d+}/staff/{id:\d+}/edit',['App\Controllers\UsersController', 'edit']);
+    $r->addRoute('POST', '/salons/{salonId:\d+}/staff/{id:\d+}/edit',['App\Controllers\UsersController', 'update']);
+
+    $r->addRoute('POST', '/salons/{salonId:\d+}/staff/{id:\d+}/delete',['App\Controllers\UsersController', 'delete']);
+
+
 
     // Appointments
     // Archive

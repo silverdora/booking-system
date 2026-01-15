@@ -17,6 +17,15 @@ class UsersService implements IUsersService
         $this->usersRepository = new UsersRepository();
     }
 
+    public function getAllByRoleAndSalonId(string $role, int $salonId): array
+    {
+        if (!UserRole::isValid($role)) {
+            throw new \InvalidArgumentException('Invalid role');
+        }
+
+        return $this->usersRepository->getAllByRoleAndSalonId($role, $salonId);
+    }
+
     public function updateCustomerProfile(int $id, array $data): void
     {
         $current = $this->usersRepository->getById($id);
@@ -94,21 +103,35 @@ class UsersService implements IUsersService
 
     public function create(UserModel $user): void
     {
-        // Business rule: role must be valid
         if (!UserRole::isValid($user->role)) {
             throw new \InvalidArgumentException('Invalid role');
         }
 
-        // Minimal business validation (optional)
         if (trim($user->firstName) === '' || trim($user->lastName) === '' || trim($user->email) === '') {
             throw new \InvalidArgumentException('Missing required fields');
         }
-        if ($user->role === 'customer') {
+
+        // password REQUIRED
+        if (trim((string)$user->password) === '') {
+            throw new \InvalidArgumentException('Password is required');
+        }
+
+        // hash password
+        $user->password = password_hash((string)$user->password, PASSWORD_DEFAULT);
+
+        // customer must not have salonId
+        if ($user->role === strtolower(UserRole::Customer->value)) {
             $user->salonId = null;
+        } else {
+            // staff must have salonId
+            if (empty($user->salonId)) {
+                throw new \InvalidArgumentException('Salon ID is required for staff');
+            }
         }
 
         $this->usersRepository->create($user);
     }
+
 
     public function update(int $id, UserModel $user): void
     {
@@ -119,12 +142,30 @@ class UsersService implements IUsersService
         if (trim($user->firstName) === '' || trim($user->lastName) === '' || trim($user->email) === '') {
             throw new \InvalidArgumentException('Missing required fields');
         }
-        if ($user->role === 'customer') {
+
+        $current = $this->usersRepository->getById($id);
+        if (!$current) {
+            throw new \InvalidArgumentException('User not found');
+        }
+
+        // password: if empty -> keep current, else hash new
+        if (trim((string)$user->password) === '') {
+            $user->password = $current->password;
+        } else {
+            $user->password = password_hash((string)$user->password, PASSWORD_DEFAULT);
+        }
+
+        if ($user->role === strtolower(UserRole::Customer->value)) {
             $user->salonId = null;
+        } else {
+            if (empty($user->salonId)) {
+                throw new \InvalidArgumentException('Salon ID is required for staff');
+            }
         }
 
         $this->usersRepository->update($id, $user);
     }
+
 
     public function delete(int $id): void
     {

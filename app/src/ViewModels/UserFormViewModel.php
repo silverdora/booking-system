@@ -11,12 +11,15 @@ class UserFormViewModel
     public bool $isEdit;
     public string $action;
     public string $title;
+    public bool $isOwner;
 
-    public function __construct(UserModel $user, string $role, bool $isEdit, ?string $actionOverride = null)
+
+    public function __construct(UserModel $user, string $role, bool $isEdit, ?string $actionOverride = null, bool $isOwner = false)
     {
         $this->user = $user;
         $this->role = $role;
         $this->isEdit = $isEdit;
+        $this->isOwner = $isOwner;
 
         $this->title = $isEdit
             ? 'Edit ' . ucfirst($role)

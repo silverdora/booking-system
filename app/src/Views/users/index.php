@@ -10,12 +10,11 @@ require __DIR__ . '/../partials/header.php';
 $rolePlural = $vm->role . 's'; // URL convention: customers/owners/receptionists/specialists
 ?>
 <p>
-    <a href="/users/customers">Customers</a> |
-    <a href="/users/owners">Owners</a> |
     <a href="/users/receptionists">Receptionists</a> |
     <a href="/users/specialists">Specialists</a>
 </p>
-
+<a href="/users/specialists/create">Add new specialist</a>
+<a href="/users/receptionists/create">Add new receptionist</a>
 <h1><?= htmlspecialchars($vm->title) ?></h1>
 
 <p>

@@ -8,6 +8,22 @@ use PDO;
 
 class UsersRepository extends Repository implements IUsersRepository
 {
+    public function getAllByRoleAndSalonId(string $role, int $salonId): array
+    {
+        $sql = 'SELECT id, role, firstName, lastName, email, phone, salonId, password
+            FROM users
+            WHERE role = :role AND salonId = :salonId
+            ORDER BY lastName, firstName';
+
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([
+            ':role' => $role,
+            ':salonId' => $salonId
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_CLASS, '\App\Models\UserModel');
+    }
+
     public function emailExistsForOtherUser(string $email, int $currentUserId): bool
     {
         $sql = 'SELECT COUNT(*)
@@ -120,8 +136,8 @@ class UsersRepository extends Repository implements IUsersRepository
             ':lastName' => $user->lastName,
             ':email' => $user->email,
             ':phone' => $user->phone,
-            ':salonId' => $user->salonId,          // can be null
-            ':password' => $user->password // can be null
+            ':salonId' => $user->salonId,// can be null
+            ':password' => $user->password
         ]);
 
         // store inserted id back into model

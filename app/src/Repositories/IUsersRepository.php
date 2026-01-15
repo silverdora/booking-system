@@ -22,4 +22,7 @@ interface IUsersRepository
     public function specialistCanDoService(int $specialistId, int $serviceId): bool;
     public function getFullNameById(int $id): ?string;
     public function emailExistsForOtherUser(string $email, int $currentUserId): bool;
+    /** @return UserModel[] */
+    public function getAllByRoleAndSalonId(string $role, int $salonId): array;
+
 }
