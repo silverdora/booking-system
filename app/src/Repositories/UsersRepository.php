@@ -8,6 +8,22 @@ use PDO;
 
 class UsersRepository extends Repository implements IUsersRepository
 {
+    public function emailExistsForOtherUser(string $email, int $currentUserId): bool
+    {
+        $sql = 'SELECT COUNT(*)
+            FROM users
+            WHERE email = :email AND id <> :id
+            LIMIT 1';
+
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([
+            ':email' => $email,
+            ':id' => $currentUserId,
+        ]);
+
+        return ((int)$stmt->fetchColumn()) > 0;
+    }
+
     public function getFullNameById(int $id): ?string
     {
         $sql = 'SELECT firstName, lastName FROM users WHERE id = :id';

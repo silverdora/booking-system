@@ -21,5 +21,5 @@ interface IUsersRepository
     public function getSpecialistOptionsByServiceId(int $serviceId): array;
     public function specialistCanDoService(int $specialistId, int $serviceId): bool;
     public function getFullNameById(int $id): ?string;
-
+    public function emailExistsForOtherUser(string $email, int $currentUserId): bool;
 }

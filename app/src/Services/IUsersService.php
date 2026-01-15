@@ -18,5 +18,7 @@ interface IUsersService
     public function update(int $id, UserModel $user): void;
 
     public function delete(int $id): void;
+
+    public function updateCustomerProfile(int $id, array $data): void;
 }
 

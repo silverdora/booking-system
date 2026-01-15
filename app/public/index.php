@@ -74,6 +74,12 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     // Delete
     $r->addRoute('POST', '/users/{role}/{id:\d+}/delete', ['App\Controllers\UsersController', 'delete']);
 
+    // Customer profile (self)
+    $r->addRoute('GET',  '/profile',      ['App\Controllers\UsersController', 'profileShow']);
+    $r->addRoute('GET',  '/profile/edit', ['App\Controllers\UsersController', 'profileEdit']);
+    $r->addRoute('POST', '/profile/edit', ['App\Controllers\UsersController', 'profileUpdate']);
+
+
     // Appointments
     // Archive
     $r->addRoute('GET',  '/appointments',                 ['App\Controllers\AppointmentsController', 'index']);

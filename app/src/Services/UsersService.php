@@ -17,6 +17,49 @@ class UsersService implements IUsersService
         $this->usersRepository = new UsersRepository();
     }
 
+    public function updateCustomerProfile(int $id, array $data): void
+    {
+        $current = $this->usersRepository->getById($id);
+        if (!$current || $current->role !== strtolower(UserRole::Customer->value)) {
+            throw new \InvalidArgumentException('Customer not found');
+        }
+
+        $firstName = trim((string)($data['firstName'] ?? ''));
+        $lastName  = trim((string)($data['lastName'] ?? ''));
+        $email     = trim((string)($data['email'] ?? ''));
+        $phone     = trim((string)($data['phone'] ?? ''));
+
+        if ($firstName === '' || $lastName === '' || $email === '' || $phone === '') {
+            throw new \InvalidArgumentException('Missing required fields');
+        }
+
+        // email unique check
+        if ($this->usersRepository->emailExistsForOtherUser($email, $id)) {
+            throw new \InvalidArgumentException('Email is already in use');
+        }
+
+        // password optional: keep old if empty
+        $passwordToStore = $current->password;
+        $newPasswordRaw = trim((string)($data['password'] ?? ''));
+
+        if ($newPasswordRaw !== '') {
+            if (mb_strlen($newPasswordRaw) < 8) {
+                throw new \InvalidArgumentException('Password must be at least 8 characters');
+            }
+            $passwordToStore = password_hash($newPasswordRaw, PASSWORD_DEFAULT);
+        }
+
+        $current->firstName = $firstName;
+        $current->lastName  = $lastName;
+        $current->email     = $email;
+        $current->phone     = $phone;
+        $current->salonId   = null;
+        $current->password  = $passwordToStore;
+
+        $this->usersRepository->update($id, $current);
+    }
+
+
     // Normalizes + validates role (domain rule)
     public function normalizeRole(string $roleFromUrl): string
     {

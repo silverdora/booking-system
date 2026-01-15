@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Enums\UserRole;
+use App\Framework\Authentication;
 use App\Models\UserModel;
 use App\Services\IUsersService;
 use App\Services\UsersService;
@@ -18,8 +20,82 @@ class UsersController
         $this->usersService = new UsersService();
     }
 
+    public function profileShow(): void
+    {
+        Authentication::requireRole([strtolower(UserRole::Customer->value)]);
+        $auth = $this->requireCustomer();
+        $id = (int)$auth['id'];
+
+        $user = $this->usersService->getById($id);
+        if (!$user || $user->role !== strtolower(UserRole::Customer->value)) {
+            http_response_code(404);
+            echo 'Not found';
+            return;
+        }
+
+        $vm = new \App\ViewModels\UserDetailViewModel($user, strtolower(UserRole::Customer->value));
+
+        require __DIR__ . '/../Views/users/profile/show.php';
+    }
+
+    public function profileEdit(): void
+    {
+        Authentication::requireRole([strtolower(UserRole::Customer->value)]);
+        $auth = $this->requireCustomer();
+        $id = (int)$auth['id'];
+
+        $user = $this->usersService->getById($id);
+        if (!$user || $user->role !== strtolower(UserRole::Customer->value)) {
+            http_response_code(404);
+            echo 'Not found';
+            return;
+        }
+
+        $vm = new \App\ViewModels\UserFormViewModel($user, strtolower(UserRole::Customer->value), true, '/profile/edit');
+
+        require __DIR__ . '/../Views/users/profile/edit.php';
+    }
+
+    public function profileUpdate(): void
+    {
+        Authentication::requireRole([strtolower(UserRole::Customer->value)]);
+        try {
+            $auth = $this->requireCustomer();
+            $id = (int)$auth['id'];
+
+            $this->usersService->updateCustomerProfile($id, $_POST);
+            $updated = $this->usersService->getById($id);
+            if ($updated) {
+                $_SESSION['user']['firstName'] = (string)$updated->firstName;
+                $_SESSION['user']['lastName']  = (string)$updated->lastName;
+            }
+
+            header('Location: /profile');
+            exit;
+        } catch (\InvalidArgumentException $e) {
+            http_response_code(400);
+            echo $e->getMessage();
+        }
+    }
+
+    private function requireCustomer(): array
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
+        $user = $_SESSION['user'] ?? null;
+
+        if (!$user || ($user['role'] ?? null) !== strtolower(UserRole::Customer->value)) {
+            header('Location: /login');
+            exit;
+        }
+
+        return $user;
+    }
     public function index($role): void
     {
+        Authentication::requireRole([strtolower(UserRole::Owner->value)]);
         try {
             $role = $this->usersService->normalizeRole((string)$role);
 
@@ -35,6 +111,8 @@ class UsersController
 
     public function create($role): void
     {
+        Authentication::requireRole([strtolower(UserRole::Owner->value)]);
+
         try {
             $role = $this->usersService->normalizeRole((string)$role);
 
@@ -68,6 +146,7 @@ class UsersController
 
     public function show($role, $id): void
     {
+        Authentication::requireRole([strtolower(UserRole::Owner->value)]);
         try {
             $role = $this->usersService->normalizeRole((string)$role);
             $id = (int)$id;
@@ -91,6 +170,7 @@ class UsersController
 
     public function edit($role, $id): void
     {
+        Authentication::requireRole([strtolower(UserRole::Owner->value)]);
         try {
             $role = $this->usersService->normalizeRole((string)$role);
             $id = (int)$id;
@@ -113,6 +193,7 @@ class UsersController
 
     public function update($role, $id): void
     {
+        Authentication::requireRole([strtolower(UserRole::Owner->value)]);
         try {
             $role = $this->usersService->normalizeRole((string)$role);
             $id = (int)$id;
@@ -132,6 +213,7 @@ class UsersController
 
     public function delete($role, $id): void
     {
+        Authentication::requireRole([strtolower(UserRole::Owner->value)]);
         try {
             $role = $this->usersService->normalizeRole((string)$role);
             $id = (int)$id;
