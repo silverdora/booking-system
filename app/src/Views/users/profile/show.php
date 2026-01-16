@@ -10,16 +10,35 @@ require __DIR__ . '/../../partials/header.php';
 $user = $vm->user;
 ?>
 
-<h1><?= htmlspecialchars($title) ?></h1>
+<div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0"><?= htmlspecialchars($title) ?></h1>
+    <a href="/profile/edit" class="btn btn-primary btn-sm">Edit profile</a>
+</div>
 
-<p><strong>Name:</strong> <?= htmlspecialchars($user->firstName . ' ' . $user->lastName) ?></p>
-<p><strong>Email:</strong> <?= htmlspecialchars($user->email) ?></p>
-<p><strong>Phone:</strong> <?= htmlspecialchars($user->phone) ?></p>
+<div class="card">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                <div class="text-light opacity-75 small">Name</div>
+                <div class="fw-semibold">
+                    <?= htmlspecialchars(trim(($user->firstName ?? '') . ' ' . ($user->lastName ?? ''))) ?>
+                </div>
+            </div>
 
-<p>
-    <a href="/profile/edit">Edit profile</a>
-</p>
+            <div class="col-12 col-md-6">
+                <div class="text-light opacity-75 small">Email</div>
+                <div class="fw-semibold"><?= htmlspecialchars($user->email ?? '') ?></div>
+            </div>
+
+            <div class="col-12 col-md-6">
+                <div class="text-light opacity-75 small">Phone</div>
+                <div class="fw-semibold"><?= htmlspecialchars($user->phone ?? '') ?></div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <?php require __DIR__ . '/../../partials/footer.php'; ?>
+
 
 

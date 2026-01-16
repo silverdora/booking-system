@@ -6,32 +6,60 @@ require __DIR__ . '/../../partials/header.php';
 $user = $vm->user;
 ?>
 
-<p><a href="/profile">&larr; Back to profile</a></p>
+<div class="mb-3">
+    <a class="link-secondary text-decoration-none" href="/profile">&larr; Back to profile</a>
+</div>
 
-<h1><?= htmlspecialchars($title) ?></h1>
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="h4 mb-3 text-center"><?= htmlspecialchars($title) ?></h1>
 
-<form action="<?= htmlspecialchars($vm->action) ?>" method="post">
-    <label for="firstName">First name*</label>
-    <input id="firstName" name="firstName" required
-           value="<?= htmlspecialchars($user->firstName ?? '') ?>">
+                <form action="<?= htmlspecialchars($vm->action) ?>" method="post" novalidate>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label for="firstName" class="form-label">First name</label>
+                            <input id="firstName" name="firstName" class="form-control" required
+                                   value="<?= htmlspecialchars($user->firstName ?? '') ?>">
+                        </div>
 
-    <label for="lastName">Last name*</label>
-    <input id="lastName" name="lastName" required
-           value="<?= htmlspecialchars($user->lastName ?? '') ?>">
+                        <div class="col-12 col-md-6">
+                            <label for="lastName" class="form-label">Last name</label>
+                            <input id="lastName" name="lastName" class="form-control" required
+                                   value="<?= htmlspecialchars($user->lastName ?? '') ?>">
+                        </div>
+                    </div>
 
-    <label for="email">Email*</label>
-    <input id="email" name="email" type="email" required
-           value="<?= htmlspecialchars($user->email ?? '') ?>">
+                    <div class="mt-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input id="email" name="email" type="email" class="form-control" required
+                               value="<?= htmlspecialchars($user->email ?? '') ?>">
+                    </div>
 
-    <label for="phone">Phone*</label>
-    <input id="phone" name="phone" type="tel" required
-           value="<?= htmlspecialchars($user->phone ?? '') ?>">
+                    <div class="mt-3">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input id="phone" name="phone" type="tel" class="form-control" required
+                               value="<?= htmlspecialchars($user->phone ?? '') ?>">
+                    </div>
 
-    <label for="password">New password (leave empty to keep current)</label>
-    <input id="password" name="password" type="password" autocomplete="new-password">
+                    <div class="mt-3">
+                        <label for="password" class="form-label">New password</label>
+                        <input id="password" name="password" type="password" class="form-control" autocomplete="new-password">
+                        <div class="form-text text-light">Leave empty to keep current password.</div>
+                    </div>
 
-    <button type="submit">Save changes</button>
-</form>
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                        <a href="/profile" class="btn btn-outline-light">Cancel</a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
 
 <?php require __DIR__ . '/../../partials/footer.php'; ?>
+
 

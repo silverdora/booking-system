@@ -4,47 +4,74 @@ use App\ViewModels\SalonServices\SalonServicesViewModel;
 ?>
 
 <?php require __DIR__ . '/../../partials/header.php'; ?>
-<p><a href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>">&larr; Back to salon</a></p>
 
-<h1><?= htmlspecialchars($vm->title) ?></h1>
+<div class="mb-3">
+    <a class="link-secondary text-decoration-none"
+       href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>">&larr; Back to salon</a>
+</div>
 
-<p>
-    <a href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>/services/create">Add service</a>
-</p>
+<div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0"><?= htmlspecialchars($vm->title) ?></h1>
+
+    <a class="btn btn-primary btn-sm"
+       href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>/services/create">
+        Add service
+    </a>
+</div>
 
 <?php if (!empty($vm->services)) : ?>
-    <ul>
+    <div class="list-group">
         <?php foreach ($vm->services as $service) : ?>
-            <li>
-                <h2>
-                    <a href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>/services/<?= htmlspecialchars((string)$service->id) ?>">
-                        <?= htmlspecialchars($service->name) ?>
-                    </a>
-                </h2>
+            <div class="list-group-item bg-dark border-secondary">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                    <div>
+                        <div class="fw-semibold">
+                            <a class="link-light text-decoration-none"
+                               href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>/services/<?= htmlspecialchars((string)$service->id) ?>">
+                                <?= htmlspecialchars($service->name) ?>
+                            </a>
+                        </div>
 
-                <?php if ($service->price !== null) : ?>
-                    <p><strong>Price:</strong> €<?= htmlspecialchars(number_format($service->price, 2)) ?></p>
-                <?php endif; ?>
+                        <div class="small text-light opacity-75">
+                            <?php if ($service->price !== null) : ?>
+                                €<?= htmlspecialchars(number_format($service->price, 2)) ?>
+                            <?php else: ?>
+                                <span class="text-light opacity-50">No price</span>
+                            <?php endif; ?>
 
-                <?php if ($service->durationMinutes !== null) : ?>
-                    <p><strong>Duration:</strong> <?= htmlspecialchars((string)$service->durationMinutes) ?> min</p>
-                <?php endif; ?>
+                            <span class="mx-2">•</span>
 
-                <p>
-                    <a href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>/services/<?= htmlspecialchars((string)$service->id) ?>/edit">Edit</a>
+                            <?php if ($service->durationMinutes !== null) : ?>
+                                <?= htmlspecialchars((string)$service->durationMinutes) ?> min
+                            <?php else: ?>
+                                <span class="text-light opacity-50">No duration</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
 
-                <form action="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>/services/<?= htmlspecialchars((string)$service->id) ?>/delete"
-                      method="post" style="display:inline"
-                      onsubmit="return confirm('Delete this service?');">
-                    <button type="submit">Delete</button>
-                </form>
-                </p>
-            </li>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-outline-light btn-sm"
+                           href="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>/services/<?= htmlspecialchars((string)$service->id) ?>/edit">
+                            Edit
+                        </a>
+
+                        <form action="/salons/<?= htmlspecialchars((string)$vm->salonId) ?>/services/<?= htmlspecialchars((string)$service->id) ?>/delete"
+                              method="post"
+                              onsubmit="return confirm('Delete this service?');"
+                              class="m-0">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         <?php endforeach; ?>
-    </ul>
+    </div>
 <?php else : ?>
-    <p>No services added yet.</p>
+    <div class="alert alert-secondary" role="alert">
+        No services added yet.
+    </div>
 <?php endif; ?>
 
 <?php require __DIR__ . '/../../partials/footer.php'; ?>
+
 

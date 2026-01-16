@@ -4,40 +4,71 @@ use App\ViewModels\RegisterViewModel;
 ?>
 
 <?php require __DIR__ . '/../partials/header.php'; ?>
-<h1>Register</h1>
 
-<?php if ($vm->error !== ''): ?>
-    <p style="color:red;"><?= htmlspecialchars($vm->error) ?></p>
-<?php endif; ?>
+<div class="row justify-content-center">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+        <div class="card mt-5">
+            <div class="card-body">
+                <h1 class="h4 mb-3 text-center">Register</h1>
 
-<form method="post" action="/register">
+                <?php if ($vm->error !== ''): ?>
+                    <div class="alert alert-danger" role="alert">
+                        <?= htmlspecialchars($vm->error) ?>
+                    </div>
+                <?php endif; ?>
 
-    <label for="role">Register as*</label>
-    <select id="role" name="role" required>
-        <option value="customer">Customer</option>
-        <option value="owner">Salon owner</option>
-    </select>
+                <form method="post" action="/register" novalidate>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Register as</label>
+                        <select id="role" name="role" class="form-select" required>
+                            <option value="customer">Customer</option>
+                            <option value="owner">Salon owner</option>
+                        </select>
+                    </div>
 
-    <label for="firstName">First name*</label>
-    <input id="firstName" name="firstName" required>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label for="firstName" class="form-label">First name</label>
+                            <input id="firstName" name="firstName" class="form-control" required>
+                        </div>
 
-    <label for="lastName">Last name*</label>
-    <input id="lastName" name="lastName" required>
+                        <div class="col-12 col-md-6">
+                            <label for="lastName" class="form-label">Last name</label>
+                            <input id="lastName" name="lastName" class="form-control" required>
+                        </div>
+                    </div>
 
-    <label for="email">Email*</label>
-    <input id="email" name="email" type="email" required>
+                    <div class="mt-3 mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input id="email" name="email" type="email" class="form-control" required>
+                    </div>
 
-    <label for="phone">Phone</label>
-    <input id="phone" name="phone" type="tel">
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone <span class="text-body-secondary">(optional)</span></label>
+                        <input id="phone" name="phone" type="tel" class="form-control">
+                    </div>
 
-    <label for="password">Password* (min 8 chars)</label>
-    <input id="password" name="password" type="password" minlength="8" required>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input id="password" name="password" type="password" minlength="8" class="form-control" required>
+                        <div class="form-text">Minimum 8 characters.</div>
+                    </div>
 
-    <button type="submit">Create account</button>
-</form>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            Create account
+                        </button>
+                    </div>
+                </form>
 
-<p>
-    Already have an account? <a href="/login">Login</a>
-</p>
-</body>
-</html>
+                <p class="text-center text-light mt-3 mb-0">
+                    Already have an account?
+                    <a href="/login" class="link-primary text-decoration-none fw-semibold">Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php require __DIR__ . '/../partials/footer.php'; ?>
+

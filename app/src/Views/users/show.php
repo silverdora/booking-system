@@ -10,32 +10,71 @@ require __DIR__ . '/../partials/header.php';
 $user = $vm->user;
 $rolePlural = $vm->role . 's';
 ?>
-<p>
-    <a href="/users/<?= htmlspecialchars($rolePlural) ?>">&larr; Back to <?= htmlspecialchars($rolePlural) ?></a>
-</p>
 
-<h1><?= htmlspecialchars($user->firstName . ' ' . $user->lastName) ?></h1>
+<div class="mb-3">
+    <a class="link-secondary text-decoration-none"
+       href="/users/<?= htmlspecialchars($rolePlural) ?>">&larr; Back to <?= htmlspecialchars($rolePlural) ?></a>
+</div>
 
-<p><strong>Role:</strong> <?= htmlspecialchars($user->role) ?></p>
-<p><strong>Email:</strong> <?= htmlspecialchars($user->email) ?></p>
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex flex-wrap gap-2 justify-content-between align-items-start">
+            <div>
+                <h1 class="h4 mb-1">
+                    <?= htmlspecialchars($user->firstName . ' ' . $user->lastName) ?>
+                </h1>
+                <div class="text-light opacity-75">
+                    <?= htmlspecialchars(ucfirst((string)$user->role)) ?>
+                </div>
+            </div>
 
-<?php if (!empty($user->phone)) : ?>
-    <p><strong>Phone:</strong> <?= htmlspecialchars($user->phone) ?></p>
-<?php endif; ?>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-outline-light btn-sm"
+                   href="/users/<?= htmlspecialchars($rolePlural) ?>/<?= htmlspecialchars((string)$user->id) ?>/edit">
+                    Edit
+                </a>
 
-<?php if (!empty($user->salonId)) : ?>
-    <p><strong>Salon ID:</strong> <?= htmlspecialchars((string)$user->salonId) ?></p>
-<?php endif; ?>
+                <form action="/users/<?= htmlspecialchars($rolePlural) ?>/<?= htmlspecialchars((string)$user->id) ?>/delete"
+                      method="post"
+                      onsubmit="return confirm('Delete this user?');"
+                      class="m-0">
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        Delete
+                    </button>
+                </form>
+            </div>
+        </div>
 
-<p>
-    <a href="/users/<?= htmlspecialchars($rolePlural) ?>/<?= htmlspecialchars((string)$user->id) ?>/edit">Edit</a>
-</p>
+        <hr>
 
-<form action="/users/<?= htmlspecialchars($rolePlural) ?>/<?= htmlspecialchars((string)$user->id) ?>/delete"
-      method="post"
-      onsubmit="return confirm('Delete this user?');">
-    <button type="submit">Delete</button>
-</form>
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                <div class="fw-semibold">Email</div>
+                <div><?= htmlspecialchars($user->email) ?></div>
+            </div>
+
+            <?php if (!empty($user->phone)) : ?>
+                <div class="col-12 col-md-6">
+                    <div class="fw-semibold">Phone</div>
+                    <div><?= htmlspecialchars($user->phone) ?></div>
+                </div>
+            <?php endif; ?>
+
+            <div class="col-12 col-md-6">
+                <div class="fw-semibold">Role</div>
+                <div><?= htmlspecialchars((string)$user->role) ?></div>
+            </div>
+
+            <?php if (!empty($user->salonId)) : ?>
+                <div class="col-12 col-md-6">
+                    <div class="fw-semibold">Salon ID</div>
+                    <div><?= htmlspecialchars((string)$user->salonId) ?></div>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>
+
 

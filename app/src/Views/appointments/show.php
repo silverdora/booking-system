@@ -11,42 +11,85 @@ $appointment = $vm->appointment;
 
 ?>
 
-<p>
-    <a href="/appointments">&larr; Back to appointments</a>
-</p>
+<div class="mb-3">
+    <a class="link-secondary text-decoration-none" href="/appointments">&larr; Back to appointments</a>
+</div>
 
-<h1><?= htmlspecialchars($vm->title) ?></h1>
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex flex-wrap gap-2 justify-content-between align-items-start">
+            <div>
+                <h1 class="h4 mb-1"><?= htmlspecialchars($vm->title) ?></h1>
+            </div>
 
-<p><strong>Salon:</strong> <?= htmlspecialchars($vm->salonName) ?></p>
-<p><strong>Service:</strong> <?= htmlspecialchars($vm->serviceName) ?></p>
-<p><strong>Specialist:</strong> <?= htmlspecialchars($vm->specialistName) ?></p>
-<p><strong>Customer:</strong> <?= htmlspecialchars($vm->customerName) ?></p>
+            <?php if ($vm->canManage) : ?>
+                <div class="d-flex gap-2">
+                    <a class="btn btn-outline-light btn-sm"
+                       href="/appointments/<?= htmlspecialchars((string)$appointment->id) ?>/edit">
+                        Edit
+                    </a>
 
-<p><strong>Start:</strong> <?= htmlspecialchars($vm->appointment->startsAt) ?></p>
-<p><strong>End:</strong> <?= htmlspecialchars($vm->appointment->endsAt) ?></p>
+                    <form action="/appointments/<?= htmlspecialchars((string)$appointment->id) ?>/delete"
+                          method="post"
+                          class="m-0"
+                          onsubmit="return confirm('Delete this appointment?');">
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            Cancel/Delete
+                        </button>
+                    </form>
+                </div>
+            <?php endif; ?>
+        </div>
 
+        <hr>
 
-<?php if ($vm->canManage) : ?>
-    <p>
-        <a href="/appointments/<?= htmlspecialchars((string)$appointment->id) ?>/edit">Edit</a>
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                <div class="fw-semibold">Salon</div>
+                <div><?= htmlspecialchars($vm->salonName) ?></div>
+            </div>
 
-    <form action="/appointments/<?= htmlspecialchars((string)$appointment->id) ?>/delete"
-          method="post" style="display:inline"
-          onsubmit="return confirm('Delete this appointment?');">
-        <button type="submit">Cancel/Delete</button>
-    </form>
-    </p>
-<?php endif; ?>
-<?php if ($vm->isCustomer && $vm->canCancel) : ?>
-    <form action="/appointments/<?= htmlspecialchars((string)$appointment->id) ?>/cancel"
-          method="post"
-          onsubmit="return confirm('Cancel this appointment?');">
-        <button type="submit">Cancel</button>
-    </form>
-<?php endif; ?>
+            <div class="col-12 col-md-6">
+                <div class="fw-semibold">Service</div>
+                <div><?= htmlspecialchars($vm->serviceName) ?></div>
+            </div>
 
+            <div class="col-12 col-md-6">
+                <div class="fw-semibold">Specialist</div>
+                <div><?= htmlspecialchars($vm->specialistName) ?></div>
+            </div>
 
+            <div class="col-12 col-md-6">
+                <div class="fw-semibold">Customer</div>
+                <div><?= htmlspecialchars($vm->customerName) ?></div>
+            </div>
+
+            <div class="col-12 col-md-6">
+                <div class="fw-semibold">Start</div>
+                <div><?= htmlspecialchars($vm->appointment->startsAt) ?></div>
+            </div>
+
+            <div class="col-12 col-md-6">
+                <div class="fw-semibold">End</div>
+                <div><?= htmlspecialchars($vm->appointment->endsAt) ?></div>
+            </div>
+        </div>
+
+        <?php if ($vm->isCustomer && $vm->canCancel) : ?>
+            <hr>
+            <form action="/appointments/<?= htmlspecialchars((string)$appointment->id) ?>/cancel"
+                  method="post"
+                  class="m-0"
+                  onsubmit="return confirm('Cancel this appointment?');">
+                <button type="submit" class="btn btn-warning">
+                    Cancel appointment
+                </button>
+            </form>
+        <?php endif; ?>
+    </div>
+</div>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>
+
 
 

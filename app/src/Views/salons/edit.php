@@ -3,29 +3,84 @@
 ?>
 
 <?php require __DIR__ . '/../partials/header.php'; ?>
-<p><a href="/salons/<?= htmlspecialchars((string)$salon->id) ?>">&larr; Back to salon</a></p>
-<h1>Edit salon</h1>
 
-<form action="/salons/<?= htmlspecialchars((string)$salon->id) ?>/edit" method="post">
-    <label for="name">Name*</label>
-    <input id="name" name="name" required value="<?= htmlspecialchars($salon->name) ?>">
+<div class="mb-3">
+    <a class="link-secondary text-decoration-none" href="/appointments">&larr; Back to salon management</a>
+</div>
 
-    <label for="type">Type</label>
-    <input id="type" name="type" value="<?= htmlspecialchars($salon->type) ?>">
+<div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-7">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="h4 mb-3 text-center">Edit salon</h1>
 
-    <label for="address">Address*</label>
-    <input id="address" name="address" required value="<?= htmlspecialchars($salon->address) ?>">
+                <form action="/salons/<?= htmlspecialchars((string)$salon->id) ?>/edit" method="post" novalidate>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="name" class="form-label">Name</label>
+                            <input id="name"
+                                   name="name"
+                                   class="form-control"
+                                   required
+                                   value="<?= htmlspecialchars($salon->name) ?>">
+                        </div>
 
-    <label for="city">City*</label>
-    <input id="city" name="city" required value="<?= htmlspecialchars($salon->city) ?>">
+                        <div class="col-12 col-md-6">
+                            <label for="type" class="form-label">Type</label>
+                            <input id="type"
+                                   name="type"
+                                   class="form-control"
+                                   value="<?= htmlspecialchars($salon->type) ?>">
+                        </div>
 
-    <label for="phone">Phone</label>
-    <input id="phone" name="phone" type="tel" value="<?= htmlspecialchars($salon->phone) ?>">
+                        <div class="col-12 col-md-6">
+                            <label for="city" class="form-label">City</label>
+                            <input id="city"
+                                   name="city"
+                                   class="form-control"
+                                   required
+                                   value="<?= htmlspecialchars($salon->city) ?>">
+                        </div>
 
-    <label for="email">Email</label>
-    <input id="email" name="email" type="email" value="<?= htmlspecialchars($salon->email) ?>">
+                        <div class="col-12">
+                            <label for="address" class="form-label">Address</label>
+                            <input id="address"
+                                   name="address"
+                                   class="form-control"
+                                   required
+                                   value="<?= htmlspecialchars($salon->address) ?>">
+                        </div>
 
-    <button type="submit">Save changes</button>
-</form>
-</body>
-</html>
+                        <div class="col-12 col-md-6">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input id="phone"
+                                   name="phone"
+                                   type="tel"
+                                   class="form-control"
+                                   value="<?= htmlspecialchars($salon->phone) ?>">
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="email" class="form-label">Email</label>
+                            <input id="email"
+                                   name="email"
+                                   type="email"
+                                   class="form-control"
+                                   value="<?= htmlspecialchars($salon->email) ?>">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            Save changes
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php require __DIR__ . '/../partials/footer.php'; ?>
+
