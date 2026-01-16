@@ -44,14 +44,14 @@ use App\ViewModels\RegisterViewModel;
                     </div>
 
                     <div class="mb-3">
-                        <label for="phone" class="form-label">Phone <span class="text-body-secondary">(optional)</span></label>
+                        <label for="phone" class="form-label">Phone <span class=" text-light">(optional)</span></label>
                         <input id="phone" name="phone" type="tel" class="form-control">
                     </div>
 
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
                         <input id="password" name="password" type="password" minlength="8" class="form-control" required>
-                        <div class="form-text">Minimum 8 characters.</div>
+                        <div class="form-text text-light">Minimum 8 characters.</div>
                     </div>
 
                     <div class="d-grid">

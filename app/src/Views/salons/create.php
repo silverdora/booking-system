@@ -1,28 +1,57 @@
-
 <?php require __DIR__ . '/../partials/header.php'; ?>
-<p><a href="/salons">&larr; Back to salons</a></p>
-<h1>Create a new salon</h1>
 
-<form action="/salons/create" method="post">
-    <label for="name">Name*</label>
-    <input id="name" name="name" required>
+<div class="mb-3">
+    <a class="link-secondary text-decoration-none" href="/salons">&larr; Back to salons</a>
+</div>
 
-    <label for="type">Type</label>
-    <input id="type" name="type" placeholder="Barber / Beauty / Tattoo">
+<div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-7">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="h4 mb-3 text-center">Create a new salon</h1>
 
-    <label for="address">Address*</label>
-    <input id="address" name="address" required>
+                <form action="/salons/create" method="post" novalidate>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="name" class="form-label">Name</label>
+                            <input id="name" name="name" class="form-control" required>
+                        </div>
 
-    <label for="city">City*</label>
-    <input id="city" name="city" required>
+                        <div class="col-12 col-md-6">
+                            <label for="type" class="form-label">Type</label>
+                            <input id="type" name="type" class="form-control" placeholder="Barber / Beauty / Tattoo">
+                        </div>
 
-    <label for="phone">Phone</label>
-    <input id="phone" name="phone" type="tel">
+                        <div class="col-12 col-md-6">
+                            <label for="city" class="form-label">City</label>
+                            <input id="city" name="city" class="form-control" required>
+                        </div>
 
-    <label for="email">Email</label>
-    <input id="email" name="email" type="email">
+                        <div class="col-12">
+                            <label for="address" class="form-label">Address</label>
+                            <input id="address" name="address" class="form-control" required>
+                        </div>
 
-    <button type="submit">Save salon</button>
-</form>
-</body>
-</html>
+                        <div class="col-12 col-md-6">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input id="phone" name="phone" type="tel" class="form-control">
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="email" class="form-label">Email</label>
+                            <input id="email" name="email" type="email" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">Save salon</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php require __DIR__ . '/../partials/footer.php'; ?>
+
