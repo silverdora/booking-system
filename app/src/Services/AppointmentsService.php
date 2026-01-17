@@ -498,10 +498,7 @@ class AppointmentsService implements IAppointmentsService
         return $this->usersRepository->getSpecialistOptions($salonId);
     }
 
-    public function getCustomerOptions(): array
-    {
-        return $this->usersRepository->getCustomerOptions();
-    }
+
     /**
      * @return array<int, array{startsAt:string, endsAt:string}>
      */

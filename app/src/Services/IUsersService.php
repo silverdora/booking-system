@@ -16,5 +16,6 @@ interface IUsersService
     public function updateCustomerProfile(int $id, array $data): void;
     /** @return UserModel[] */
     public function getAllByRoleAndSalonId(string $role, int $salonId): array;
+    public function getCustomerOptions(): array;
 }
 

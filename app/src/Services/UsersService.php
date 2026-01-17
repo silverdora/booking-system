@@ -17,6 +17,11 @@ class UsersService implements IUsersService
         $this->usersRepository = new UsersRepository();
     }
 
+    public function getCustomerOptions(): array
+    {
+        return $this->usersRepository->getCustomerOptions();
+    }
+
     public function getAllByRoleAndSalonId(string $role, int $salonId): array
     {
         if (!UserRole::isValid($role)) {

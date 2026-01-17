@@ -19,6 +19,26 @@ class UsersController
     {
         $this->usersService = new UsersService();
     }
+
+    /**
+     * @throws \JsonException
+     */
+    public function getCustomerWithJS():void
+    {
+        $customers = $this->usersService->getCustomerOptions();
+        $customersList = json_encode($customers, JSON_THROW_ON_ERROR);
+        echo $customersList;
+    }
+
+    public function addCustomerWithJS():void
+    {
+        $data = json_decode(file_get_contents("php://input"), true);
+        $data['role'] = strtolower(UserRole::Customer->value);
+        $user = new UserModel($data);
+        $this->usersService->create($user);
+        echo json_encode(['success' => true]);
+    }
+
     public function staffIndex($salonId): void
     {
         $salonId = (int)$salonId;

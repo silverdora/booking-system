@@ -55,7 +55,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
 
     $r->addRoute('POST', '/salons/{salonId:\d+}/services/{id:\d+}/delete',   ['App\Controllers\SalonServicesController', 'delete']);
 
-
+    $r->addRoute('GET', '/users/getCustomerWithJS',      ['App\Controllers\UsersController', 'getCustomerWithJS']);
     //Users
     // Archive per role
     $r->addRoute('GET',  '/users/{role}',                 ['App\Controllers\UsersController', 'index']);
@@ -63,6 +63,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     // Create form + store
     $r->addRoute('GET',  '/users/{role}/create',          ['App\Controllers\UsersController', 'create']);
     $r->addRoute('POST', '/users/{role}/create',          ['App\Controllers\UsersController', 'store']);
+    $r->addRoute('POST', '/users/addCustomerWithJS',      ['App\Controllers\UsersController', 'addCustomerWithJS']);
 
     // Detail
     $r->addRoute('GET',  '/users/{role}/{id:\d+}',        ['App\Controllers\UsersController', 'show']);

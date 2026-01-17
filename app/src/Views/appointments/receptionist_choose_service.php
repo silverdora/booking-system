@@ -30,6 +30,82 @@
                     <?php endforeach; ?>
                 </select>
             </div>
+            <div class="d-flex justify-content gap-2 mt-4">
+            <button id="new-form-button" class="btn btn-primary">Add new customer</button>
+            </div>
+
+            <div  id="add-new-customer-form" class="row justify-content-center" hidden="">
+                <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <h2 class="h4 mb-3 text-center">
+                                Add new user
+                            </h2>
+
+                            <form novalidate>
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <label for="firstName" class="form-label">First name</label>
+                                        <input id="firstName"
+                                               name="firstName"
+                                               class="form-control"
+                                               required
+                                               value="">
+                                    </div>
+
+                                    <div class="col-12 col-md-6">
+                                        <label for="lastName" class="form-label">Last name</label>
+                                        <input id="lastName"
+                                               name="lastName"
+                                               class="form-control"
+                                               required
+                                               value="">
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input id="email"
+                                               name="email"
+                                               type="email"
+                                               class="form-control"
+                                               required
+                                               value="">
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label for="password" class="form-label">Password</label>
+                                        <input id="password"
+                                               name="password"
+                                               type="password"
+                                               class="form-control"
+                                               autocomplete="new-password" value="">
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label for="phone" class="form-label">Phone</label>
+                                        <input id="phone"
+                                               name="phone"
+                                               type="tel"
+                                               class="form-control"
+                                               value="">
+                                    </div>
+
+
+
+                                </div>
+
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <button id="add-new-customer" class="btn btn-primary">
+                                        Create customer
+                                    </button>
+                                    <button id="cancel-new-customer" class="btn btn-light">Cancel</button>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="col-12">
                 <label for="serviceId" class="form-label">Service</label>
@@ -52,6 +128,8 @@
     </div>
 </div>
 
+<script src="/assets/js/add_new_customer.js"></script>
 <?php require __DIR__ . '/../partials/footer.php'; ?>
+
 
 

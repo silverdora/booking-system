@@ -96,6 +96,3 @@ $user = $vm->user;
 </div>
 
 
-
-
-

@@ -7,25 +7,29 @@ use App\Framework\Authentication;
 use App\Models\AppointmentModel;
 use App\Services\IAppointmentsService;
 use App\Services\AppointmentsService;
+use App\Services\IUsersService;
+use App\Services\UsersService;
 use App\ViewModels\AppointmentsViewModel;
 use App\ViewModels\AppointmentDetailViewModel;
 use App\ViewModels\AppointmentsFormViewModel;
 
 class AppointmentsController
 {
-    private IAppointmentsService $service;
+    private IAppointmentsService $appointmentsService;
+    private IUsersService $usersService;
 
     public function __construct()
     {
-        $this->service = new AppointmentsService();
+        $this->appointmentsService = new AppointmentsService();
+        $this->usersService = new UsersService();
     }
     public function receptionistChooseService(): void
     {
         $this->requireReceptionist();
         $salonId = $this->getSalonIdFromSession();
 
-        $services = $this->service->getServiceOptions($salonId);
-        $customers = $this->service->getCustomerOptions();
+        $services = $this->appointmentsService->getServiceOptions($salonId);
+        $customers = $this->usersService->getCustomerOptions();
 
         $title = 'Create appointment — choose customer & service';
         require __DIR__ . '/../Views/appointments/receptionist_choose_service.php';
@@ -65,7 +69,7 @@ class AppointmentsController
         }
 
         try {
-            $specialistsWithSlots = $this->service->getSpecialistsWithSlots($salonId, $serviceId, $date);
+            $specialistsWithSlots = $this->appointmentsService->getSpecialistsWithSlots($salonId, $serviceId, $date);
 
             $title = 'Create appointment — choose slot';
             require __DIR__ . '/../Views/appointments/receptionist_choose_slot.php';
@@ -84,7 +88,7 @@ class AppointmentsController
             $appointment = new AppointmentModel($_POST);
             $appointment->salonId = $salonId;
 
-            $this->service->create($salonId, $appointment);
+            $this->appointmentsService->create($salonId, $appointment);
 
             header('Location: /appointments');
             exit;
@@ -110,7 +114,7 @@ class AppointmentsController
         $salonId = (int)$salonId;
 
         // list of salon services
-        $services = $this->service->getServiceOptions($salonId);
+        $services = $this->appointmentsService->getServiceOptions($salonId);
 
         $title = 'Choose service';
         require __DIR__ . '/../Views/appointments/choose_service.php';
@@ -148,7 +152,7 @@ class AppointmentsController
         }
 
         try {
-            $specialistsWithSlots = $this->service->getSpecialistsWithSlots($salonId, $serviceId, $date);
+            $specialistsWithSlots = $this->appointmentsService->getSpecialistsWithSlots($salonId, $serviceId, $date);
 
             $title = 'Choose slot';
             require __DIR__ . '/../Views/appointments/choose_slot.php';
@@ -166,7 +170,7 @@ class AppointmentsController
         try {
             $appointment = new AppointmentModel($_POST);
             $appointment->customerId = (int)($_SESSION['user']['id'] ?? 0);
-            $this->service->create($salonId, $appointment);
+            $this->appointmentsService->create($salonId, $appointment);
 
             header('Location: /appointments');
             exit;
@@ -192,14 +196,14 @@ class AppointmentsController
         $specialistId = (int)$specialistId;
 
         // duration from salonServices
-        $service = $this->service->getServiceById($salonId, $serviceId);
+        $service = $this->appointmentsService->getServiceById($salonId, $serviceId);
         if (!$service) {
             http_response_code(404);
             echo 'Service not found.';
             return;
         }
 
-        $slots = $this->service->getAvailableSlotsBySpecialist(
+        $slots = $this->appointmentsService->getAvailableSlotsBySpecialist(
             $salonId,
             $specialistId,
             $date,
@@ -244,7 +248,7 @@ class AppointmentsController
                 echo 'Not logged in.';
                 return;
             }
-            $vm = $this->service->buildIndexViewModelForCustomer($userId);
+            $vm = $this->appointmentsService->buildIndexViewModelForCustomer($userId);
             require __DIR__ . '/../Views/appointments/index.php';
             return;
         }
@@ -263,7 +267,7 @@ class AppointmentsController
 
         // specialist appointments
         if ($role === strtolower(\App\Enums\UserRole::Specialist->value)) {
-            $vm = $this->service->buildIndexViewModelForSpecialist($salonId, $userId, $view, $date);
+            $vm = $this->appointmentsService->buildIndexViewModelForSpecialist($salonId, $userId, $view, $date);
 
 
             $vm->ownerLinks = [];
@@ -277,7 +281,7 @@ class AppointmentsController
         }
 
         // owner/receptionist:
-        $vm = $this->service->buildIndexViewModelForSalon($salonId, $view, $date);
+        $vm = $this->appointmentsService->buildIndexViewModelForSalon($salonId, $view, $date);
 
         // owner links
         if ($role !== strtolower(\App\Enums\UserRole::Owner->value)) {
@@ -294,9 +298,9 @@ class AppointmentsController
 
         $salonId = $this->getSalonIdFromSession();
         $appointment = new AppointmentModel(['salonId' => $salonId]);
-        $services = $this->service->getServiceOptions($salonId);
-        $specialists = $this->service->getSpecialistOptions($salonId);
-        $customers = $this->service->getCustomerOptions();
+        $services = $this->appointmentsService->getServiceOptions($salonId);
+        $specialists = $this->appointmentsService->getSpecialistOptions($salonId);
+        $customers = $this->appointmentsService->getCustomerOptions();
 
         $vm = new AppointmentsFormViewModel(
             $salonId,
@@ -322,7 +326,7 @@ class AppointmentsController
 
         try {
             $appointment = new AppointmentModel($_POST);
-            $this->service->create($salonId, $appointment);
+            $this->appointmentsService->create($salonId, $appointment);
 
             header("Location: /appointments");
             exit;
@@ -337,9 +341,9 @@ class AppointmentsController
                 false,
                 'Create appointment',
                 '/appointments/create',
-                $this->service->getServiceOptions($salonId),
-                $this->service->getSpecialistOptions($salonId),
-                $this->service->getCustomerOptions(),
+                $this->appointmentsService->getServiceOptions($salonId),
+                $this->appointmentsService->getSpecialistOptions($salonId),
+                $this->appointmentsService->getCustomerOptions(),
                 $errors
             );
 
@@ -356,7 +360,7 @@ class AppointmentsController
 
         // customer
         if ($role === strtolower(UserRole::Customer->value)) {
-            $vm = $this->service->buildDetailViewModelForCustomer($userId, $id);
+            $vm = $this->appointmentsService->buildDetailViewModelForCustomer($userId, $id);
             if (!$vm) {
                 http_response_code(404);
                 echo 'Appointment not found';
@@ -371,14 +375,14 @@ class AppointmentsController
 
         // specialist:
         if ($role === strtolower(UserRole::Specialist->value)) {
-            $appt = $this->service->getById($salonId, $id);
+            $appt = $this->appointmentsService->getById($salonId, $id);
             if (!$appt || (int)$appt->specialistId !== $userId) {
                 http_response_code(404);
                 echo 'Appointment not found';
                 return;
             }
 
-            $vm = $this->service->buildDetailViewModelForSalon($salonId, $id);
+            $vm = $this->appointmentsService->buildDetailViewModelForSalon($salonId, $id);
             if (!$vm) {
                 http_response_code(404);
                 echo 'Appointment not found';
@@ -393,7 +397,7 @@ class AppointmentsController
         }
 
         // owner/receptionist
-        $vm = $this->service->buildDetailViewModelForSalon($salonId, $id);
+        $vm = $this->appointmentsService->buildDetailViewModelForSalon($salonId, $id);
         if (!$vm) {
             http_response_code(404);
             echo 'Appointment not found';
@@ -410,16 +414,16 @@ class AppointmentsController
         $salonId = $this->getSalonIdFromSession();
         $id = (int)$id;
         $this->requireReceptionist();
-        $appointment = $this->service->getById($salonId, $id);
+        $appointment = $this->appointmentsService->getById($salonId, $id);
         if (!$appointment) {
             http_response_code(404);
             echo 'Appointment not found';
             return;
         }
 
-        $services = $this->service->getServiceOptions($salonId);
-        $specialists = $this->service->getSpecialistOptions($salonId);
-        $customers = $this->service->getCustomerOptions();
+        $services = $this->appointmentsService->getServiceOptions($salonId);
+        $specialists = $this->appointmentsService->getSpecialistOptions($salonId);
+        $customers = $this->appointmentsService->getCustomerOptions();
 
         $vm = new AppointmentsFormViewModel(
             $salonId,
@@ -446,7 +450,7 @@ class AppointmentsController
         try {
             $appointment = new AppointmentModel($_POST);
 
-            $this->service->update($salonId, $id, $appointment);
+            $this->appointmentsService->update($salonId, $id, $appointment);
 
             header("Location: /appointments/{$id}");
             exit;
@@ -456,9 +460,9 @@ class AppointmentsController
             // keep user's input so the form stays filled
             $appointment = new AppointmentModel($_POST);
 
-            $services = $this->service->getServiceOptions($salonId);
-            $specialists = $this->service->getSpecialistOptions($salonId);
-            $customers = $this->service->getCustomerOptions();
+            $services = $this->appointmentsService->getServiceOptions($salonId);
+            $specialists = $this->appointmentsService->getSpecialistOptions($salonId);
+            $customers = $this->appointmentsService->getCustomerOptions();
 
             $vm = new AppointmentsFormViewModel(
                 $salonId,
@@ -483,7 +487,7 @@ class AppointmentsController
         $salonId = $this->getSalonIdFromSession();
         $id = (int)$id;
 
-        $this->service->delete($salonId, $id);
+        $this->appointmentsService->delete($salonId, $id);
 
         header("Location: /appointments");
         exit;
@@ -502,7 +506,7 @@ class AppointmentsController
             return;
         }
 
-        $this->service->deleteByCustomer($customerId, $id);
+        $this->appointmentsService->deleteByCustomer($customerId, $id);
 
         header('Location: /appointments');
         exit;

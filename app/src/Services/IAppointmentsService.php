@@ -16,7 +16,7 @@ interface IAppointmentsService
     public function delete(int $salonId, int $id): void;
     public function getServiceOptions(int $salonId): array;
     public function getSpecialistOptions(int $salonId): array;
-    public function getCustomerOptions(): array;
+
     /**
      * @return array<int, array{startsAt:string, endsAt:string}>
      */
