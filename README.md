@@ -1,5 +1,25 @@
+# Credentials for testing existing users
+#### Salon owner:
+* login: kirak@gmail.com
+* password: 00000000
+
+#### Customer:
+* login: annamaria@gmail.com
+* password: 00000000
+
+#### Specialist:
+* login: renatagibson@gmil.com
+* password: 00000000
+
+#### Receptionist:
+* login: katem@gmail.com
+* password: 00000000
+
+# GitHub repository: 
+https://github.com/silverdora/booking-system
+
 # Docker template for PHP projects 
-This repository provides a starting template for PHP application development.
+This is a copy of instructions for Docker setup which we used in classes and which was reused for this project.
 
 It contains:
 * NGINX webserver
