@@ -24,5 +24,7 @@ interface IUsersRepository
     public function emailExistsForOtherUser(string $email, int $currentUserId): bool;
     /** @return UserModel[] */
     public function getAllByRoleAndSalonId(string $role, int $salonId): array;
+    public function emailExists(string $email): bool;
+    public function setSalonId(int $userId, int $salonId): void;
 
 }

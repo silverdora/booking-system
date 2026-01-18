@@ -11,6 +11,13 @@ $user = $vm->user;
                     <?= htmlspecialchars($vm->title) ?>
                 </h1>
 
+                <?php if (!empty($error)): ?>
+                    <div class="alert alert-danger" role="alert">
+                        <?= htmlspecialchars($error) ?>
+                    </div>
+                <?php endif; ?>
+
+
                 <form action="<?= htmlspecialchars($vm->action) ?>" method="post" novalidate>
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
@@ -61,7 +68,9 @@ $user = $vm->user;
                                    name="phone"
                                    type="tel"
                                    class="form-control"
+                                   required
                                    value="<?= htmlspecialchars($user->phone ?? '') ?>">
+
                         </div>
 
                         <?php if (($user->role ?? '') !== 'customer' && !$vm->isOwner): ?>

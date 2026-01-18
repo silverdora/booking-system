@@ -8,6 +8,18 @@ use PDO;
 
 class UsersRepository extends Repository implements IUsersRepository
 {
+
+    public function setSalonId(int $userId, int $salonId): void
+    {
+        $sql = 'UPDATE users SET salonId = :salonId WHERE id = :userId';
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([
+            ':salonId' => $salonId,
+            ':userId' => $userId,
+        ]);
+    }
+
+
     public function getAllByRoleAndSalonId(string $role, int $salonId): array
     {
         $sql = 'SELECT id, role, firstName, lastName, email, phone, salonId, password
@@ -23,6 +35,16 @@ class UsersRepository extends Repository implements IUsersRepository
 
         return $stmt->fetchAll(PDO::FETCH_CLASS, '\App\Models\UserModel');
     }
+
+    public function emailExists(string $email): bool
+    {
+        $sql = "SELECT 1 FROM users WHERE email = :email LIMIT 1";
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([':email' => $email]);
+
+        return (bool)$stmt->fetchColumn();
+    }
+
 
     public function emailExistsForOtherUser(string $email, int $currentUserId): bool
     {

@@ -2,9 +2,18 @@
 /** @var \App\ViewModels\SalonDetailViewModel $vm */
 $salon = $vm->salon;
 ?>
+<?php
+$user = $_SESSION['user'] ?? [];
+$role = strtolower((string)($user['role'] ?? ''));
+$mySalonId = (int)($user['salonId'] ?? 0);
+
+$canManageThisSalon = ($role === 'owner' && $mySalonId > 0 && $mySalonId === (int)$salon->id);
+$isCustomer = ($role === 'customer');
+?>
+
 
 <?php require __DIR__ . '/../partials/header.php'; ?>
-<?php if (($user['role'] ?? '') === 'сustomer'): ?>
+<?php if (($user['role'] ?? '') === 'customer') : ?>
 <div class="mb-3">
     <a class="link-secondary text-decoration-none" href="/salons">&larr; Back to all salons</a>
 </div>
@@ -21,13 +30,17 @@ $salon = $vm->salon;
             </div>
 
             <div class="d-flex gap-2">
+                <?php if ($isCustomer): ?>
                 <a class="btn btn-primary btn-sm" href="/salons/<?= (int)$salon->id ?>/book">Book an appointment</a>
+                <?php endif; ?>
 
-                <?php if (($user['role'] ?? '') === 'owner'): ?>
-                    <a class="btn btn-outline-light btn-sm" href="/salons/<?= htmlspecialchars((string)$salon->id) ?>/edit">
+                <?php if ($canManageThisSalon): ?>
+                    <a class="btn btn-outline-light btn-sm"
+                       href="/salons/<?= (int)$salon->id ?>/edit">
                         Edit
                     </a>
                 <?php endif; ?>
+
             </div>
         </div>
 
@@ -61,15 +74,16 @@ $salon = $vm->salon;
             <?php endif; ?>
         </div>
 
-        <?php if (($user['role'] ?? '') === 'owner'): ?>
+        <?php if ($canManageThisSalon): ?>
             <hr>
-            <form action="/salons/<?= htmlspecialchars((string)$salon->id) ?>/delete"
+            <form action="/salons/<?= (int)$salon->id ?>/delete"
                   method="post"
                   onsubmit="return confirm('Delete this salon?');"
                   class="d-inline">
                 <button type="submit" class="btn btn-danger btn-sm">Delete</button>
             </form>
         <?php endif; ?>
+
     </div>
 </div>
 

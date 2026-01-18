@@ -17,19 +17,49 @@ class SalonRepository extends Repository implements ISalonRepository
     }
 
 
-    public function create(SalonModel $salon): void
+    public function create(SalonModel $salon, int $ownerId): int
     {
-        $sql = 'INSERT INTO salons (name, type, address, city, phone, email) VALUES (:name, :type, :address, :city, :phone, :email)';
-        $stmt = $this->getConnection()->prepare($sql);
-        $stmt->bindParam(':name', $salon->name, \PDO::PARAM_STR);
-        $stmt->bindParam(':type', $salon->type, \PDO::PARAM_STR);
-        $stmt->bindParam(':address', $salon->address, \PDO::PARAM_STR);
-        $stmt->bindParam(':city', $salon->city, \PDO::PARAM_STR);
-        $stmt->bindParam(':phone', $salon->phone, \PDO::PARAM_STR);
-        $stmt->bindParam(':email', $salon->email, \PDO::PARAM_STR);
+        $sql = 'INSERT INTO salons (ownerId, name, type, address, city, phone, email)
+            VALUES (:ownerId, :name, :type, :address, :city, :phone, :email)';
 
-        $stmt->execute();
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute([
+            ':ownerId' => $ownerId,
+            ':name' => $salon->name,
+            ':type' => $salon->type,
+            ':address' => $salon->address,
+            ':city' => $salon->city,
+            ':phone' => $salon->phone,
+            ':email' => $salon->email,
+        ]);
+
+        return (int)$this->getConnection()->lastInsertId();
     }
+
+    public function createAndAssignToOwner(SalonModel $salon, int $ownerId): int
+    {
+        $pdo = $this->getConnection();
+        $pdo->beginTransaction();
+
+        try {
+            $newSalonId = $this->create($salon, $ownerId);
+
+            $stmt = $pdo->prepare('UPDATE users SET salonId = :salonId WHERE id = :userId');
+            $stmt->execute([
+                ':salonId' => $newSalonId,
+                ':userId' => $ownerId,
+            ]);
+
+            $pdo->commit();
+            return $newSalonId;
+
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+    }
+
+
 
     public function getById(int $id): ?SalonModel
     {
@@ -84,5 +114,45 @@ class SalonRepository extends Repository implements ISalonRepository
         $name = $stmt->fetchColumn();
         return $name !== false ? (string)$name : null;
     }
+
+    public function createWithOwnerAndAssignToUser(SalonModel $salon, int $ownerId): int
+    {
+        $pdo = $this->getConnection();
+        $pdo->beginTransaction();
+
+        try {
+            // 1) insert salon
+            $sql = 'INSERT INTO salons (name, type, address, city, phone, email, ownerId)
+                VALUES (:name, :type, :address, :city, :phone, :email, :ownerId)';
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':name' => $salon->name,
+                ':type' => $salon->type,
+                ':address' => $salon->address,
+                ':city' => $salon->city,
+                ':phone' => $salon->phone,
+                ':email' => $salon->email,
+                ':ownerId' => $ownerId,
+            ]);
+
+            $newSalonId = (int)$pdo->lastInsertId();
+
+            // 2) update user salonId
+            $stmt2 = $pdo->prepare('UPDATE users SET salonId = :salonId WHERE id = :userId');
+            $stmt2->execute([
+                ':salonId' => $newSalonId,
+                ':userId' => $ownerId,
+            ]);
+
+            $pdo->commit();
+            return $newSalonId;
+
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+    }
+
 
 }

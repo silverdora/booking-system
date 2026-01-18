@@ -13,6 +13,11 @@
         <div class="card">
             <div class="card-body">
                 <h1 class="h4 mb-3 text-center">Edit salon</h1>
+                <?php if (!empty($error)): ?>
+                    <div class="alert alert-danger" role="alert">
+                        <?= htmlspecialchars($error) ?>
+                    </div>
+                <?php endif; ?>
 
                 <form action="/salons/<?= htmlspecialchars((string)$salon->id) ?>/edit" method="post" novalidate>
                     <div class="row g-3">
@@ -57,6 +62,7 @@
                                    name="phone"
                                    type="tel"
                                    class="form-control"
+                                   required
                                    value="<?= htmlspecialchars($salon->phone) ?>">
                         </div>
 
@@ -66,6 +72,7 @@
                                    name="email"
                                    type="email"
                                    class="form-control"
+                                   required
                                    value="<?= htmlspecialchars($salon->email) ?>">
                         </div>
                     </div>

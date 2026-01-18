@@ -7,7 +7,7 @@ interface ISalonService
 {
     public function getAll(): array;
 
-    public function create(SalonModel $salon): void;
+    public function create(SalonModel $salon, int $ownerId): int;
 
     public function getById(int $id): ?SalonModel;
 

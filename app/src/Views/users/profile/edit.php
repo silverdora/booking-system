@@ -15,6 +15,11 @@ $user = $vm->user;
         <div class="card">
             <div class="card-body">
                 <h1 class="h4 mb-3 text-center"><?= htmlspecialchars($title) ?></h1>
+                <?php if (!empty($error)): ?>
+                    <div class="alert alert-danger" role="alert">
+                        <?= htmlspecialchars($error) ?>
+                    </div>
+                <?php endif; ?>
 
                 <form action="<?= htmlspecialchars($vm->action) ?>" method="post" novalidate>
                     <div class="row g-3">

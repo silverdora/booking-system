@@ -10,6 +10,12 @@
             <div class="card-body">
                 <h1 class="h4 mb-3 text-center">Create a new salon</h1>
 
+                <?php if (!empty($error)): ?>
+                    <div class="alert alert-danger" role="alert">
+                        <?= htmlspecialchars($error) ?>
+                    </div>
+                <?php endif; ?>
+
                 <form action="/salons/create" method="post" novalidate>
                     <div class="row g-3">
                         <div class="col-12">
@@ -34,12 +40,22 @@
 
                         <div class="col-12 col-md-6">
                             <label for="phone" class="form-label">Phone</label>
-                            <input id="phone" name="phone" type="tel" class="form-control">
+                            <input id="phone"
+                                   name="phone"
+                                   type="tel"
+                                   class="form-control"
+                                   required
+                                   value="<?= htmlspecialchars($salon->phone ?? '') ?>">
                         </div>
 
                         <div class="col-12 col-md-6">
                             <label for="email" class="form-label">Email</label>
-                            <input id="email" name="email" type="email" class="form-control">
+                            <input id="email"
+                                   name="email"
+                                   type="email"
+                                   class="form-control"
+                                   required
+                                   value="<?= htmlspecialchars($salon->email ?? '') ?>">
                         </div>
                     </div>
 

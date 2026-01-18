@@ -17,19 +17,76 @@ class SalonService implements ISalonService
     {
         return $this->salonRepository->getAll();
     }
-    public function create(SalonModel $salon): void
+
+    /**
+     * @throws \Throwable
+     */
+    public function create(SalonModel $salon, int $ownerId): int
     {
-        $this->salonRepository->create($salon);
+        $this->validateSalon($salon);
+        return $this->salonRepository->createAndAssignToOwner($salon, $ownerId);
     }
+
+
+
+    public function update(int $id, SalonModel $salon): void
+    {
+        $existing = $this->salonRepository->getById($id);
+        if (!$existing) {
+            throw new \InvalidArgumentException('Salon not found');
+        }
+
+        $this->validateSalon($salon);
+        $this->salonRepository->update($id, $salon);
+    }
+
+    /**
+     * @throws \InvalidArgumentException
+     */
+    private function validateSalon(SalonModel $salon): void
+    {
+        // sanitize
+        $salon->name    = trim((string)($salon->name ?? ''));
+        $salon->type    = trim((string)($salon->type ?? ''));
+        $salon->city    = trim((string)($salon->city ?? ''));
+        $salon->address = trim((string)($salon->address ?? ''));
+        $salon->phone   = trim((string)($salon->phone ?? ''));
+        $salon->email   = trim((string)($salon->email ?? ''));
+
+        // presence (REQUIRED)
+        if (
+            $salon->name === '' ||
+            $salon->city === '' ||
+            $salon->address === '' ||
+            $salon->phone === '' ||
+            $salon->email === ''
+        ) {
+            throw new \InvalidArgumentException('Missing required fields');
+        }
+
+        // email type
+        if (!filter_var($salon->email, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException('Invalid email format');
+        }
+
+        // phone type
+        if (!preg_match('/^[0-9\-\+\(\)\s\.]+$/', $salon->phone)) {
+            throw new \InvalidArgumentException('Invalid phone format');
+        }
+
+        $digitsOnly = preg_replace('/\D+/', '', $salon->phone) ?? '';
+        if (mb_strlen($digitsOnly) < 7) {
+            throw new \InvalidArgumentException('Invalid phone format');
+        }
+
+        // normalize phone
+        $salon->phone = preg_replace('/\s+/', ' ', trim($salon->phone));
+    }
+
 
     public function getById(int $id): ?SalonModel
     {
         return $this->salonRepository->getById($id);
-    }
-
-    public function update(int $id, SalonModel $salon): void
-    {
-        $this->salonRepository->update($id, $salon);
     }
 
     public function delete(int $id): void

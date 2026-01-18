@@ -149,8 +149,17 @@ class UsersController
             header('Location: /profile');
             exit;
         } catch (\InvalidArgumentException $e) {
+            // show form again + show error
+            $user = $this->usersService->getById($id);
+            $vm = new UserFormViewModel(
+                $user,
+                strtolower(UserRole::Customer->value),
+                true,
+                '/profile/edit'
+            );
+            $error = $e->getMessage();
             http_response_code(400);
-            echo $e->getMessage();
+            require __DIR__ . '/../Views/users/profile/edit.php';
         }
     }
 
@@ -221,10 +230,12 @@ class UsersController
             $role = $this->usersService->normalizeRole((string)$role);
             $auth = $this->requireUsersManagementAccess($role);
 
+            $isOwner = (($auth['role'] ?? '') === strtolower(UserRole::Owner->value));
+
             $user = new UserModel($_POST);
             $user->role = $role;
 
-            if (($auth['role'] ?? '') === strtolower(UserRole::Owner->value)) {
+            if ($isOwner) {
                 $user->salonId = (int)$auth['salonId'];
             }
 
@@ -232,11 +243,29 @@ class UsersController
 
             header('Location: /users/' . $this->pluralRole($role));
             exit;
+
         } catch (\InvalidArgumentException $e) {
             http_response_code(400);
-            echo $e->getMessage();
+
+            // show form again
+            $role = $this->usersService->normalizeRole((string)$role);
+            $auth = $this->requireUsersManagementAccess($role);
+            $isOwner = (($auth['role'] ?? '') === strtolower(UserRole::Owner->value));
+
+            $user = new UserModel($_POST);
+            $user->role = $role;
+
+            if ($isOwner) {
+                $user->salonId = (int)$auth['salonId'];
+            }
+
+            $vm = new UserFormViewModel($user, $role, false, null, $isOwner);
+            $error = $e->getMessage();
+
+            require __DIR__ . '/../Views/users/create.php';
         }
     }
+
 
 
     public function show($role, $id): void
@@ -320,20 +349,20 @@ class UsersController
                 return;
             }
 
+            $isOwner = (($auth['role'] ?? '') === strtolower(UserRole::Owner->value));
+
             // owner: only own salon staff
-            if (($auth['role'] ?? '') === strtolower(UserRole::Owner->value)) {
-                if ((int)$current->salonId !== (int)$auth['salonId']) {
-                    http_response_code(404);
-                    echo 'Not found';
-                    return;
-                }
+            if ($isOwner && (int)$current->salonId !== (int)$auth['salonId']) {
+                http_response_code(404);
+                echo 'Not found';
+                return;
             }
 
             $user = new UserModel($_POST);
             $user->role = $role;
 
             // owner: force salonId from session
-            if (($auth['role'] ?? '') === strtolower(UserRole::Owner->value)) {
+            if ($isOwner) {
                 $user->salonId = (int)$auth['salonId'];
             }
 
@@ -341,11 +370,32 @@ class UsersController
 
             header('Location: /users/' . $this->pluralRole($role) . '/' . $id);
             exit;
+
         } catch (\InvalidArgumentException $e) {
             http_response_code(400);
-            echo $e->getMessage();
+
+            // show form
+            $role = $this->usersService->normalizeRole((string)$role);
+            $id = (int)$id;
+
+            $auth = $this->requireUsersManagementAccess($role);
+            $isOwner = (($auth['role'] ?? '') === strtolower(UserRole::Owner->value));
+
+            $user = new UserModel($_POST);
+            $user->id = $id;
+            $user->role = $role;
+
+            if ($isOwner) {
+                $user->salonId = (int)$auth['salonId'];
+            }
+
+            $vm = new UserFormViewModel($user, $role, true, null, $isOwner);
+            $error = $e->getMessage();
+
+            require __DIR__ . '/../Views/users/edit.php';
         }
     }
+
 
 
     public function delete($role, $id): void
