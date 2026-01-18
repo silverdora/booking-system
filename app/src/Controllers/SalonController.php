@@ -64,7 +64,7 @@ class SalonController
             require __DIR__ . '/../Views/salons/create.php';
         }
     }
-    
+
 
 
     private function requireSalonOwner(int $salonIdFromRoute): void

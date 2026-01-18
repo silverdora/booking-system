@@ -16,8 +16,6 @@ class UsersViewModel
     {
         $this->users = $users;
         $this->role = $role;
-
-        // presentation-only logic belongs here
         $this->title = ucfirst($role) . 's';
     }
 }

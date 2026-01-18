@@ -53,6 +53,7 @@ class AuthenticationController
         require __DIR__ . '/../Views/authentication/register.php';
     }
 
+
     public function register(): void
     {
         try {
@@ -78,7 +79,15 @@ class AuthenticationController
             exit;
 
         } catch (\InvalidArgumentException $e) {
-            $vm = new RegisterViewModel($e->getMessage());
+            $vm = new RegisterViewModel(
+                $e->getMessage(),
+                (string)($_POST['role'] ?? 'customer'),
+                (string)($_POST['firstName'] ?? ''),
+                (string)($_POST['lastName'] ?? ''),
+                (string)($_POST['email'] ?? ''),
+                (string)($_POST['phone'] ?? '')
+            );
+            http_response_code(400);
             require __DIR__ . '/../Views/authentication/register.php';
         }
     }

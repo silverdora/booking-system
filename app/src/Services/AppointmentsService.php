@@ -90,7 +90,7 @@ class AppointmentsService implements IAppointmentsService
         $specialistName = $this->getUserName($specialistId, 'Specialist');
         $title = "My appointments — {$specialistName}";
 
-        // specialist не должен видеть owner ссылки
+        // specialist doesn't see owner links
         $ownerLinks = [];
 
         return new AppointmentsViewModel(

@@ -80,7 +80,7 @@ class UsersService implements IUsersService
             $current->password = password_hash($newPasswordRaw, PASSWORD_DEFAULT);
         }
 
-        // 5) apply updates
+        // apply updates
         $current->firstName = $firstName;
         $current->lastName  = $lastName;
         $current->email     = $email;
@@ -158,7 +158,7 @@ class UsersService implements IUsersService
 
         $user->phone = preg_replace('/\s+/', ' ', trim($user->phone));
 
-        // email unique (очень желательно)
+        // email unique
         if ($this->usersRepository->emailExists($user->email)) {
             throw new \InvalidArgumentException('Email is already in use');
         }
@@ -216,7 +216,7 @@ class UsersService implements IUsersService
             throw new \InvalidArgumentException('Invalid email format');
         }
 
-        // phone d
+        // phone
 
         if (!preg_match('/^[0-9\-\+\(\)\s\.]+$/', $user->phone)) {
             throw new \InvalidArgumentException('Invalid phone format');

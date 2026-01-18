@@ -21,32 +21,43 @@ use App\ViewModels\RegisterViewModel;
                     <div class="mb-3">
                         <label for="role" class="form-label">Register as</label>
                         <select id="role" name="role" class="form-select" required>
-                            <option value="customer">Customer</option>
-                            <option value="owner">Salon owner</option>
+                            <option value="customer" <?= ($vm->role ?? 'customer') === 'customer' ? 'selected' : '' ?>>Customer</option>
+                            <option value="owner" <?= ($vm->role ?? 'customer') === 'owner' ? 'selected' : '' ?>>Salon owner</option>
                         </select>
+
                     </div>
 
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
                             <label for="firstName" class="form-label">First name</label>
-                            <input id="firstName" name="firstName" class="form-control" required>
+                            <input id="firstName" name="firstName" class="form-control" required
+                                   value="<?= htmlspecialchars($vm->firstName ?? '') ?>">
+
                         </div>
 
                         <div class="col-12 col-md-6">
                             <label for="lastName" class="form-label">Last name</label>
-                            <input id="lastName" name="lastName" class="form-control" required>
+                            <input id="lastName" name="lastName" class="form-control" required
+                                   value="<?= htmlspecialchars($vm->lastName ?? '') ?>">
                         </div>
                     </div>
 
                     <div class="mt-3 mb-3">
                         <label for="email" class="form-label">Email</label>
-                        <input id="email" name="email" type="email" class="form-control" required>
+                        <input id="email" name="email" type="email" class="form-control" required
+                               value="<?= htmlspecialchars($vm->email ?? '') ?>">
                     </div>
 
                     <div class="mb-3">
-                        <label for="phone" class="form-label">Phone <span class=" text-light">(optional)</span></label>
-                        <input id="phone" name="phone" type="tel" class="form-control">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input id="phone"
+                               name="phone"
+                               type="tel"
+                               class="form-control"
+                               required
+                               value="<?= htmlspecialchars($vm->phone ?? '') ?>">
                     </div>
+
 
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>

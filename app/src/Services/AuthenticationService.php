@@ -29,32 +29,61 @@ class AuthenticationService implements IAuthenticationService
 
         return $user;
     }
-
-    public function register(string $role, string $firstName, string $lastName, string $email, string $phone, string $password): array
-    {
+    public function register(
+        string $role,
+        string $firstName,
+        string $lastName,
+        string $email,
+        string $phone,
+        string $password
+    ): array {
         $role = strtolower(trim($role));
         $firstName = trim($firstName);
         $lastName  = trim($lastName);
         $email     = strtolower(trim($email));
         $phone     = trim($phone);
+        $password  = trim($password);
 
-        // Only allow customer/owner self-registration
+        // Only allow customer / owner self-registration
         if (!in_array($role, ['customer', 'owner'], true)) {
             throw new \InvalidArgumentException('Invalid role for registration.');
         }
 
-        if ($firstName === '' || $lastName === '' || $email === '' || $password === '') {
+        // presence (REQUIRED)
+        if (
+            $firstName === '' ||
+            $lastName === '' ||
+            $email === '' ||
+            $phone === '' ||
+            $password === ''
+        ) {
             throw new \InvalidArgumentException('Please fill all required fields.');
         }
 
+        // email type
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException('Invalid email address.');
         }
 
-        if (strlen($password) < 8) {
+        // phone type (REQUIRED)
+        if (!preg_match('/^[0-9\-\+\(\)\s\.]+$/', $phone)) {
+            throw new \InvalidArgumentException('Invalid phone format.');
+        }
+
+        $digitsOnly = preg_replace('/\D+/', '', $phone) ?? '';
+        if (mb_strlen($digitsOnly) < 7) {
+            throw new \InvalidArgumentException('Invalid phone format.');
+        }
+
+        // normalize phone
+        $phone = preg_replace('/\s+/', ' ', trim($phone));
+
+        // password rules
+        if (mb_strlen($password) < 8) {
             throw new \InvalidArgumentException('Password must be at least 8 characters.');
         }
 
+        // email unique
         if ($this->usersRepository->getByEmail($email)) {
             throw new \InvalidArgumentException('Email is already registered.');
         }
@@ -67,7 +96,7 @@ class AuthenticationService implements IAuthenticationService
             'lastName' => $lastName,
             'email' => $email,
             'phone' => $phone,
-            'salonId' => null,// owner can create salon later; customer stays null
+            'salonId' => null,
             'password' => $hash,
         ]);
 
@@ -82,6 +111,8 @@ class AuthenticationService implements IAuthenticationService
             'password' => $hash,
         ];
     }
+
+
 }
 
 
